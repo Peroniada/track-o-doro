@@ -3,6 +3,7 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
+
 class PomodoroSpecification extends Specification {
 
     PomodoroTracker pomodoroTracker
@@ -86,9 +87,23 @@ class PomodoroSpecification extends Specification {
 
     def "Should achieve daily goal for pomodoros"() {
         given:
-        def dailyGoal = 5
-        def sessions = []
+        pomodoroTracker.saveSessions(sessions)
+        pomodoroTracker.setDailyGoal(4)
 
+        expect:
+        pomodoroTracker.dailyPomodoroGoalFinished(LocalDate.now()) == expectedGoalFulfillment
+
+        where:
+            sessions                    ||  expectedGoalFulfillment
+            sessionCollectionOf(4)   ||  true
+            sessionCollectionOf(2)   ||  false
+
+    }
+
+    private Collection<PomodoroSession> sessionCollectionOf(int i) {
+        Collection<PomodoroSession> sessions = []
+        (1..i).each { sessions.add(todaySession().build())}
+        sessions
     }
 
     private static PomodoroSessionBuilder defaultSessionBuilder() {

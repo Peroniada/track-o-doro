@@ -4,6 +4,7 @@ import java.util.Collection;
 public class PomodoroTracker {
 
   private PomodoroSessionRepository sessionRepository;
+  private Integer dailyGoal;
 
   PomodoroTracker(PomodoroSessionRepository sessionRepository) {
     this.sessionRepository = sessionRepository;
@@ -35,5 +36,13 @@ public class PomodoroTracker {
 
   public Integer countSessionsByDateAndCategory(LocalDate date, String category) {
     return sessionRepository.findByDayAndCategory(date, category).size();
+  }
+
+  public Boolean dailyPomodoroGoalFinished(LocalDate date) {
+    return countSessionsByDay(date).equals(this.dailyGoal);
+  }
+
+  public void setDailyGoal(Integer dailyGoal) {
+    this.dailyGoal = dailyGoal;
   }
 }
