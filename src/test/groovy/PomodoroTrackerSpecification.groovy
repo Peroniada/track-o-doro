@@ -1,3 +1,7 @@
+import com.sperek.trackodoro.PomodoroSession
+import com.sperek.trackodoro.PomodoroSessionBuilder
+import com.sperek.trackodoro.PomodoroTracker
+import com.sperek.trackodoro.PomodoroTrackerConfig
 import spock.lang.Specification
 
 import java.time.LocalDate
