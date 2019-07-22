@@ -6,13 +6,16 @@ import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PomodoroTracker {
 
   private PomodoroSessionRepository sessionRepository;
   private Integer dailyGoal;
+  private final Map<String, Integer> categories = new HashMap<>();
 
   PomodoroTracker(PomodoroSessionRepository sessionRepository) {
     this.sessionRepository = sessionRepository;
@@ -55,6 +58,18 @@ public class PomodoroTracker {
     return countSessionsByDay(date).equals(this.dailyGoal);
   }
 
+  public boolean dailyPomodoroGoalForCategoryFinished(String category, LocalDate date) {
+    return countSessionsByDateAndCategory(date,category).equals(categoryDailyGoal(category));
+  }
+
+  private Integer categoryDailyGoal(String category) {
+    return categories.get(category);
+  }
+
+  public void setDailyGoalForCategory(String category, int goal) {
+      categories.put(category, goal);
+  }
+
   public void setDailyGoal(Integer dailyGoal) {
     this.dailyGoal = dailyGoal;
   }
@@ -62,13 +77,5 @@ public class PomodoroTracker {
   private List<PomodoroSession> findSatisfyingSessions(
       Specification<PomodoroSession> specification) {
     return allSessions().stream().filter(specification::isSatisfiedBy).collect(Collectors.toList());
-  }
-
-  public void setDailyGoalForCategory(String category, int goal) {
-
-  }
-
-  public boolean dailyPomodoroGoalForCategoryFinished(String category, LocalDate date) {
-    return false;
   }
 }

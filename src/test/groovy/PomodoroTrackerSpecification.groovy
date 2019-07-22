@@ -133,7 +133,7 @@ class PomodoroTrackerSpecification extends Specification {
     }
 
     private static List<PomodoroSession> booksFinishedCodingFinished() {
-        [todayBookSession(), todayBookSession(), yesterdayBookSession()]
+        [todayBookSession(), todayBookSession(), todayCodingSession(), todayCodingSession()]
     }
 
     private static List<PomodoroSession> booksFailedCodingFinished() {
