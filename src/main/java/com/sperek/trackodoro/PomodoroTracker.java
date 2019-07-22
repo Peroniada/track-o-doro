@@ -63,4 +63,12 @@ public class PomodoroTracker {
       Specification<PomodoroSession> specification) {
     return allSessions().stream().filter(specification::isSatisfiedBy).collect(Collectors.toList());
   }
+
+  public void setDailyGoalForCategory(String category, int goal) {
+
+  }
+
+  public boolean dailyPomodoroGoalForCategoryFinished(String category, LocalDate date) {
+    return false;
+  }
 }

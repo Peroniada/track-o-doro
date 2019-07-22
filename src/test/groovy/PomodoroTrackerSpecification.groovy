@@ -103,6 +103,40 @@ class PomodoroTrackerSpecification extends Specification {
 
     }
 
+    def "Should achieve daily goal by category"() {
+        given:
+        pomodoroTracker.saveSessions(sessions)
+        def booksCategory = "Books"
+        def codingCategory = "Coding"
+        pomodoroTracker.setDailyGoalForCategory(booksCategory, 2)
+        pomodoroTracker.setDailyGoalForCategory(codingCategory, 2)
+
+        def yesterday = ZonedDateTime.now().minusDays(1)
+
+        def todayBookSession = { bookSession().build() }
+        def todayCodingSession = { codingSession().build() }
+        def yesterdayBookSession = { bookSession().withOccurrence(yesterday).build()}
+        def yesterdayCodingSession = { codingSession().withOccurrence(yesterday).build()}
+
+
+        def booksFinishedCodingFail = [todayBookSession(), todayBookSession(), yesterdayBookSession()]
+        def booksFailCodingFinished = [todayCodingSession(), todayCodingSession(), yesterdayBookSession()]
+        def booksFinishedCodingFinished = [todayBookSession(), todayBookSession(), yesterdayBookSession()]
+        def booksFailedCodingFailed = [todayBookSession(), yesterdayBookSession(), todayCodingSession(), yesterdayCodingSession()]
+
+        expect:
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(booksCategory, LocalDate.now()) == expectedDailyBooksGoal
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(codingCategory, LocalDate.now()) == expectedDailyCodingGoal
+
+        where:
+        sessions                        || expectedDailyBooksGoal || expectedDailyCodingGoal
+        booksFinishedCodingFail         || true                   || false
+        booksFailCodingFinished         || false                  || true
+        booksFinishedCodingFinished     || true                   || true
+        booksFailedCodingFailed         || false                  || false
+
+    }
+
     private Collection<PomodoroSession> sessionCollectionOf(int i) {
         Collection<PomodoroSession> sessions = []
         (1..i).each { sessions.add(todaySession().build()) }

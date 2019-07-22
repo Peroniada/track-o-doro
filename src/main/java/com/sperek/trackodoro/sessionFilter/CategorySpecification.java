@@ -5,7 +5,7 @@ import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 
 public class CategorySpecification implements Specification<PomodoroSession> {
 
-  final String requiredCategory;
+  private final String requiredCategory;
 
   public CategorySpecification(String requiredCategory) {
     this.requiredCategory = requiredCategory;
