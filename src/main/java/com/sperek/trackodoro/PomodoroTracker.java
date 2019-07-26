@@ -2,12 +2,16 @@ package com.sperek.trackodoro;
 
 import com.sperek.trackodoro.sessionFilter.CategorySpecification;
 import com.sperek.trackodoro.sessionFilter.DateSpecification;
+import com.sperek.trackodoro.sessionFilter.WeekOfYearSpecification;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
-
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.temporal.WeekFields;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,6 +20,7 @@ public class PomodoroTracker {
   private PomodoroSessionRepository sessionRepository;
   private Integer dailyGoal;
   private final Map<String, Integer> categories = new HashMap<>();
+  private WeeklyGoal weeklyGoal;
 
   PomodoroTracker(PomodoroSessionRepository sessionRepository) {
     this.sessionRepository = sessionRepository;
@@ -67,11 +72,30 @@ public class PomodoroTracker {
   }
 
   public void setDailyGoalForCategory(String category, int goal) {
-      categories.put(category, goal);
+      categories.putIfAbsent(category, goal);
   }
 
   public void setDailyGoal(Integer dailyGoal) {
     this.dailyGoal = dailyGoal;
+  }
+
+  public void setWeeklyGoal(WeeklyGoal weeklyGoal) {
+    this.weeklyGoal = weeklyGoal;
+  }
+
+  public boolean weeklyGoalFinishedForDate(ZonedDateTime dateTime) {
+
+    final int week = weekNumberOfDate(dateTime);
+    final Integer weeklyGoal = this.weeklyGoal.getGoal();
+    return weeklyGoal.equals(countSessionsForWeek(week));
+  }
+
+  private int weekNumberOfDate(ZonedDateTime dateTime) {
+    return dateTime.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+  }
+
+  private Integer countSessionsForWeek(Integer week) {
+    return findSatisfyingSessions(new WeekOfYearSpecification(week)).size();
   }
 
   private List<PomodoroSession> findSatisfyingSessions(

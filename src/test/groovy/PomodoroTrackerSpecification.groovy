@@ -1,7 +1,4 @@
-import com.sperek.trackodoro.PomodoroSession
-import com.sperek.trackodoro.PomodoroSessionBuilder
-import com.sperek.trackodoro.PomodoroTracker
-import com.sperek.trackodoro.PomodoroTrackerConfig
+import com.sperek.trackodoro.*
 import spock.lang.Specification
 
 import java.time.LocalDate
@@ -12,6 +9,9 @@ class PomodoroTrackerSpecification extends Specification {
     public static final CATEGORY_CODING = "Coding"
     public static final CATEGORY_BOOK = "Book"
     PomodoroTracker pomodoroTracker
+    private static final Closure<ZonedDateTime> dateMinusDays = {
+        Long days -> ZonedDateTime.now().minusDays(days)
+    }
 
     def setup() {
         setup:
@@ -81,7 +81,6 @@ class PomodoroTrackerSpecification extends Specification {
         sessions.addAll(codingSessions)
         pomodoroTracker.saveSessions(sessions)
 
-
         expect:
         pomodoroTracker.countSessionsByDateAndCategory(day, category) == expectedNumberOfSessions
 
@@ -116,16 +115,30 @@ class PomodoroTrackerSpecification extends Specification {
         pomodoroTracker.setDailyGoalForCategory(codingCategory, 2)
 
         expect:
-        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(booksCategory, LocalDate.now()) == expectedDailyBooksGoal
-        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(codingCategory, LocalDate.now()) == expectedDailyCodingGoal
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(booksCategory, LocalDate.now()) == dailyBookGoalfinished
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(codingCategory, LocalDate.now()) == dailyCodingGoalFinished
 
         where:
-        sessions                      || expectedDailyBooksGoal || expectedDailyCodingGoal
-        booksFinishedCodingFailed()   || true                   || false
-        booksFailedCodingFinished()   || false                  || true
-        booksFinishedCodingFinished() || true                   || true
-        booksFailedCodingFailed()     || false                  || false
+        sessions                      || dailyBookGoalfinished || dailyCodingGoalFinished
+        booksFinishedCodingFailed()   || true                  || false
+        booksFailedCodingFinished()   || false                 || true
+        booksFinishedCodingFinished() || true                  || true
+        booksFailedCodingFailed()     || false                 || false
 
+    }
+
+    def "Should achieve weekly goal of pomodoros"() {
+        setup:
+        pomodoroTracker.saveSessions(sessions)
+        pomodoroTracker.setWeeklyGoal(new WeeklyGoal(5))
+
+        expect:
+        pomodoroTracker.weeklyGoalFinishedForDate(ZonedDateTime.now()) == weeklyGoalFinished
+
+        where:
+        sessions                 || weeklyGoalFinished
+        threeCompletedThisWeek() || false
+        sevenCompletedThisWeek() || true
     }
 
     private static List<PomodoroSession> booksFailedCodingFailed() {
@@ -164,6 +177,34 @@ class PomodoroTrackerSpecification extends Specification {
         Collection<PomodoroSession> sessions = []
         (1..i).each { sessions.add(todaySessionBuilder().build()) }
         sessions
+    }
+
+    private static List<PomodoroSession> sevenCompletedThisWeek() {
+        [
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(6)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(5)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(4)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(3)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(2)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(1)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
+        ]
+    }
+
+    private static List<PomodoroSession> threeCompletedThisWeek() {
+        [
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(10L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(10L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(9L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(3L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(2L)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(2L)).build()
+        ]
     }
 
     private static PomodoroSessionBuilder todaySessionBuilder() {
