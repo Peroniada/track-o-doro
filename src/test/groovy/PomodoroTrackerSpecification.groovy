@@ -1,4 +1,6 @@
 import com.sperek.trackodoro.*
+import com.sperek.trackodoro.goal.DailyGoal
+import com.sperek.trackodoro.goal.WeeklyGoal
 import spock.lang.Specification
 
 import java.time.LocalDate
@@ -6,9 +8,12 @@ import java.time.ZonedDateTime
 
 class PomodoroTrackerSpecification extends Specification {
 
-    public static final CATEGORY_CODING = "Coding"
-    public static final CATEGORY_BOOK = "Book"
-    PomodoroTracker pomodoroTracker
+    private static final CATEGORY_CODING = "Coding"
+    private static final CATEGORY_BOOK = "Book"
+    private static final userId = UUID.fromString("2d5230d2-fe9e-4b67-aec8-88ac8a463a91")
+
+
+    private PomodoroTracker pomodoroTracker
     private static final Closure<ZonedDateTime> dateMinusDays = {
         Long days -> ZonedDateTime.now().minusDays(days)
     }
@@ -95,10 +100,10 @@ class PomodoroTrackerSpecification extends Specification {
     def "Should achieve daily goal for pomodoros"() {
         setup:
         pomodoroTracker.saveSessions(sessions)
-        pomodoroTracker.setDailyGoal(4)
+        pomodoroTracker.editDailyGoal(new DailyGoal(userId, 4))
 
         expect:
-        pomodoroTracker.dailyPomodoroGoalFinished(LocalDate.now()) == expectedGoalFulfillment
+        pomodoroTracker.dailyPomodoroGoalFinished(LocalDate.now(), userId) == expectedGoalFulfillment
 
         where:
         sessions               || expectedGoalFulfillment
@@ -130,15 +135,26 @@ class PomodoroTrackerSpecification extends Specification {
     def "Should achieve weekly goal of pomodoros"() {
         setup:
         pomodoroTracker.saveSessions(sessions)
-        pomodoroTracker.setWeeklyGoal(new WeeklyGoal(5))
+        pomodoroTracker.setWeeklyGoalRepository(new WeeklyGoal(5, userId))
 
         expect:
-        pomodoroTracker.weeklyGoalFinishedForDate(ZonedDateTime.now()) == weeklyGoalFinished
+        pomodoroTracker.weeklyGoalFinishedForDate(ZonedDateTime.now(),userId) == weeklyGoalFinished
 
         where:
         sessions                 || weeklyGoalFinished
         threeCompletedThisWeek() || false
         sevenCompletedThisWeek() || true
+    }
+
+    def "Daily Goal should be created for a particular User"() {
+        given: "A user id: " + userId
+        def dailyGoalNumberOfSessions = 3
+
+        when:
+        pomodoroTracker.editDailyGoal(new DailyGoal(userId, dailyGoalNumberOfSessions))
+
+        then:
+        pomodoroTracker.userDailyGoalSessionsNumber(userId) == dailyGoalNumberOfSessions
     }
 
     private static List<PomodoroSession> booksFailedCodingFailed() {

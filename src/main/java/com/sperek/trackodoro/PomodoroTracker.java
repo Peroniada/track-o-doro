@@ -1,10 +1,14 @@
 package com.sperek.trackodoro;
 
+import com.sperek.trackodoro.goal.DailyGoal;
+import com.sperek.trackodoro.goal.Goal;
+import com.sperek.trackodoro.goal.GoalRepository;
+import com.sperek.trackodoro.goal.WeeklyGoal;
 import com.sperek.trackodoro.sessionFilter.CategorySpecification;
 import com.sperek.trackodoro.sessionFilter.DateSpecification;
 import com.sperek.trackodoro.sessionFilter.WeekOfYearSpecification;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
-import java.time.DayOfWeek;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.WeekFields;
@@ -13,17 +17,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PomodoroTracker {
 
   private PomodoroSessionRepository sessionRepository;
-  private Integer dailyGoal;
+  private GoalRepository<DailyGoal, UUID> dailyGoalRepository;
+  private GoalRepository<WeeklyGoal, UUID> weeklyGoalRepository;
   private final Map<String, Integer> categories = new HashMap<>();
-  private WeeklyGoal weeklyGoal;
 
-  PomodoroTracker(PomodoroSessionRepository sessionRepository) {
+  PomodoroTracker(
+      PomodoroSessionRepository sessionRepository,
+      GoalRepository<DailyGoal, UUID> dailyGoalRepository,
+      GoalRepository<WeeklyGoal, UUID> weeklyGoalRepository) {
     this.sessionRepository = sessionRepository;
+    this.dailyGoalRepository = dailyGoalRepository;
+    this.weeklyGoalRepository = weeklyGoalRepository;
   }
 
   public void saveSession(PomodoroSession session) {
@@ -59,12 +69,12 @@ public class PomodoroTracker {
     return findSatisfyingSessions(specification).size();
   }
 
-  public Boolean dailyPomodoroGoalFinished(LocalDate date) {
-    return countSessionsByDay(date).equals(this.dailyGoal);
+  public Boolean dailyPomodoroGoalFinished(LocalDate date, UUID userId) {
+    return countSessionsByDay(date).equals(userDailyGoalSessionsNumber(userId));
   }
 
   public boolean dailyPomodoroGoalForCategoryFinished(String category, LocalDate date) {
-    return countSessionsByDateAndCategory(date,category).equals(categoryDailyGoal(category));
+    return countSessionsByDateAndCategory(date, category).equals(categoryDailyGoal(category));
   }
 
   private Integer categoryDailyGoal(String category) {
@@ -72,22 +82,34 @@ public class PomodoroTracker {
   }
 
   public void setDailyGoalForCategory(String category, int goal) {
-      categories.putIfAbsent(category, goal);
+    categories.putIfAbsent(category, goal);
   }
 
-  public void setDailyGoal(Integer dailyGoal) {
-    this.dailyGoal = dailyGoal;
+  public void setWeeklyGoalRepository(WeeklyGoal weeklyGoal) {
+    this.weeklyGoalRepository.save(weeklyGoal);
   }
 
-  public void setWeeklyGoal(WeeklyGoal weeklyGoal) {
-    this.weeklyGoal = weeklyGoal;
-  }
-
-  public boolean weeklyGoalFinishedForDate(ZonedDateTime dateTime) {
+  public boolean weeklyGoalFinishedForDate(ZonedDateTime dateTime, UUID ownerId) {
 
     final int week = weekNumberOfDate(dateTime);
-    final Integer weeklyGoal = this.weeklyGoal.getGoal();
-    return weeklyGoal.equals(countSessionsForWeek(week));
+    final Integer weeklyGoal = weeklyGoalOfUser(ownerId).getNumberOfSessionsToFulfill();
+    return weeklyGoal <= countSessionsForWeek(week);
+  }
+
+  private Goal weeklyGoalOfUser(UUID ownerId) {
+    return this.weeklyGoalRepository.getOne(ownerId);
+  }
+
+  public void editDailyGoal(DailyGoal dailyGoal) {
+    this.dailyGoalRepository.save(dailyGoal);
+  }
+
+  public Integer userDailyGoalSessionsNumber(UUID userId) {
+    return dailyGoalOfUser(userId).getNumberOfSessionsToFulfill();
+  }
+
+  private Goal dailyGoalOfUser(UUID ownerId) {
+    return this.dailyGoalRepository.getOne(ownerId);
   }
 
   private int weekNumberOfDate(ZonedDateTime dateTime) {
