@@ -1,8 +1,8 @@
 package com.sperek.trackodoro;
 
+import com.sperek.trackodoro.category.PomodoroCategory;
 import com.sperek.trackodoro.goal.DailyGoal;
 import com.sperek.trackodoro.goal.Goal;
-import com.sperek.trackodoro.goal.GoalRepository;
 import com.sperek.trackodoro.goal.WeeklyGoal;
 import com.sperek.trackodoro.sessionFilter.CategorySpecification;
 import com.sperek.trackodoro.sessionFilter.DateSpecification;
@@ -17,23 +17,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PomodoroTracker {
 
   private PomodoroSessionRepository sessionRepository;
-  private GoalRepository<DailyGoal, UUID> dailyGoalRepository;
-  private GoalRepository<WeeklyGoal, UUID> weeklyGoalRepository;
-  private final Map<String, Integer> categories = new HashMap<>();
+  private final Map<String, PomodoroCategory> categories = new HashMap<>();
+  private WeeklyGoal weeklyGoal;
+  private DailyGoal dailyGoal;
 
-  PomodoroTracker(
-      PomodoroSessionRepository sessionRepository,
-      GoalRepository<DailyGoal, UUID> dailyGoalRepository,
-      GoalRepository<WeeklyGoal, UUID> weeklyGoalRepository) {
+  PomodoroTracker(PomodoroSessionRepository sessionRepository) {
     this.sessionRepository = sessionRepository;
-    this.dailyGoalRepository = dailyGoalRepository;
-    this.weeklyGoalRepository = weeklyGoalRepository;
   }
 
   public void saveSession(PomodoroSession session) {
@@ -69,47 +63,42 @@ public class PomodoroTracker {
     return findSatisfyingSessions(specification).size();
   }
 
-  public Boolean dailyPomodoroGoalFinished(LocalDate date, UUID userId) {
-    return countSessionsByDay(date).equals(userDailyGoalSessionsNumber(userId));
+  public Boolean dailyPomodoroGoalFinished(LocalDate date) {
+    return countSessionsByDay(date) >= (userDailyGoalSessionsNumber());
   }
 
   public boolean dailyPomodoroGoalForCategoryFinished(String category, LocalDate date) {
-    return countSessionsByDateAndCategory(date, category).equals(categoryDailyGoal(category));
+    Integer sessionsToCompleteDailyGoal =
+        categoryDailyGoal(category).sessionsToCompleteDailyGoal();
+    return countSessionsByDateAndCategory(date, category) >= sessionsToCompleteDailyGoal;
   }
 
-  private Integer categoryDailyGoal(String category) {
-    return categories.get(category);
+  public void setWeeklyGoal(WeeklyGoal weeklyGoal) {
+    this.weeklyGoal = weeklyGoal;
   }
 
-  public void setDailyGoalForCategory(String category, int goal) {
-    categories.putIfAbsent(category, goal);
-  }
-
-  public void setWeeklyGoalRepository(WeeklyGoal weeklyGoal) {
-    this.weeklyGoalRepository.save(weeklyGoal);
-  }
-
-  public boolean weeklyGoalFinishedForDate(ZonedDateTime dateTime, UUID ownerId) {
+  public boolean weeklyGoalFinishedForDate(ZonedDateTime dateTime) {
 
     final int week = weekNumberOfDate(dateTime);
-    final Integer weeklyGoal = weeklyGoalOfUser(ownerId).getNumberOfSessionsToFulfill();
+    final Integer weeklyGoal = this.weeklyGoal.getNumberOfSessionsToFulfill();
     return weeklyGoal <= countSessionsForWeek(week);
   }
 
-  private Goal weeklyGoalOfUser(UUID ownerId) {
-    return this.weeklyGoalRepository.getOne(ownerId);
-  }
-
   public void editDailyGoal(DailyGoal dailyGoal) {
-    this.dailyGoalRepository.save(dailyGoal);
+    this.dailyGoal = dailyGoal;
   }
 
-  public Integer userDailyGoalSessionsNumber(UUID userId) {
-    return dailyGoalOfUser(userId).getNumberOfSessionsToFulfill();
+  public Integer userDailyGoalSessionsNumber() {
+    return dailyGoalOfUser().getNumberOfSessionsToFulfill();
   }
 
-  private Goal dailyGoalOfUser(UUID ownerId) {
-    return this.dailyGoalRepository.getOne(ownerId);
+  private PomodoroCategory categoryDailyGoal(String category) {
+    return categories.get(category);
+  }
+
+
+  private Goal dailyGoalOfUser() {
+    return dailyGoal;
   }
 
   private int weekNumberOfDate(ZonedDateTime dateTime) {
@@ -123,5 +112,14 @@ public class PomodoroTracker {
   private List<PomodoroSession> findSatisfyingSessions(
       Specification<PomodoroSession> specification) {
     return allSessions().stream().filter(specification::isSatisfiedBy).collect(Collectors.toList());
+  }
+
+  public void createCategory(PomodoroCategory pomodoroCategory) {
+    String categoryName = pomodoroCategory.getCategoryName();
+    categories.putIfAbsent(categoryName, pomodoroCategory);
+  }
+
+  public Collection<PomodoroCategory> categoriesCreatedByUser() {
+    return categories.values();
   }
 }

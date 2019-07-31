@@ -1,24 +1,14 @@
 package com.sperek.trackodoro.goal;
 
-import java.util.UUID;
+public class WeeklyGoal implements Goal {
 
-public class WeeklyGoal implements Goal{
+  private Integer numberOfSessionsToFulfill;
 
-  private Integer numberOfSessions;
-  private UUID ownerId;
-
-  public WeeklyGoal(Integer numberOfSessions, UUID ownerId) {
-    this.numberOfSessions = numberOfSessions;
-    this.ownerId = ownerId;
+  public WeeklyGoal(Integer numberOfSessionsToFulfill) {
+    this.numberOfSessionsToFulfill = numberOfSessionsToFulfill;
   }
 
   public Integer getNumberOfSessionsToFulfill() {
-    return numberOfSessions;
+    return numberOfSessionsToFulfill;
   }
-
-  @Override
-  public UUID getGoalId() {
-    return this.ownerId;
-  }
-
 }

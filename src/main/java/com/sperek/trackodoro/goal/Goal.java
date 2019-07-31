@@ -1,6 +1,5 @@
 package com.sperek.trackodoro.goal;
 
-public interface Goal<ID> {
+public interface Goal{
   Integer getNumberOfSessionsToFulfill();
-  ID getGoalId();
 }
