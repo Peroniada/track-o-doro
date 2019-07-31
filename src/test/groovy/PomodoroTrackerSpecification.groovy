@@ -1,4 +1,8 @@
-import com.sperek.trackodoro.*
+import com.sperek.trackodoro.PomodoroSession
+import com.sperek.trackodoro.PomodoroSessionBuilder
+import com.sperek.trackodoro.PomodoroTracker
+import com.sperek.trackodoro.PomodoroTrackerConfig
+import com.sperek.trackodoro.category.PomodoroCategory
 import com.sperek.trackodoro.goal.DailyGoal
 import com.sperek.trackodoro.goal.WeeklyGoal
 import spock.lang.Specification
@@ -10,7 +14,6 @@ class PomodoroTrackerSpecification extends Specification {
 
     private static final CATEGORY_CODING = "Coding"
     private static final CATEGORY_BOOK = "Book"
-    private static final userId = UUID.fromString("2d5230d2-fe9e-4b67-aec8-88ac8a463a91")
 
 
     private PomodoroTracker pomodoroTracker
@@ -91,19 +94,19 @@ class PomodoroTrackerSpecification extends Specification {
 
         where:
         day         | category        || expectedNumberOfSessions
-        today()     | CATEGORY_BOOK   ||                        3
-        yesterday() | CATEGORY_BOOK   ||                        2
-        today()     | CATEGORY_CODING ||                        1
-        yesterday() | CATEGORY_CODING ||                        3
+        today()     | CATEGORY_BOOK   || 3
+        yesterday() | CATEGORY_BOOK   || 2
+        today()     | CATEGORY_CODING || 1
+        yesterday() | CATEGORY_CODING || 3
     }
 
     def "Should achieve daily goal for pomodoros"() {
         setup:
         pomodoroTracker.saveSessions(sessions)
-        pomodoroTracker.editDailyGoal(new DailyGoal(userId, 4))
+        pomodoroTracker.editDailyGoal(new DailyGoal(4))
 
         expect:
-        pomodoroTracker.dailyPomodoroGoalFinished(LocalDate.now(), userId) == expectedGoalFulfillment
+        pomodoroTracker.dailyPomodoroGoalFinished(LocalDate.now()) == expectedGoalFulfillment
 
         where:
         sessions               || expectedGoalFulfillment
@@ -114,14 +117,12 @@ class PomodoroTrackerSpecification extends Specification {
     def "Should achieve daily goal by category"() {
         setup:
         pomodoroTracker.saveSessions(sessions)
-        def booksCategory = CATEGORY_BOOK
-        def codingCategory = CATEGORY_CODING
-        pomodoroTracker.setDailyGoalForCategory(booksCategory, 2)
-        pomodoroTracker.setDailyGoalForCategory(codingCategory, 2)
+        pomodoroTracker.createCategory(new PomodoroCategory(CATEGORY_BOOK, new DailyGoal(2), new WeeklyGoal(5)))
+        pomodoroTracker.createCategory(new PomodoroCategory(CATEGORY_CODING, new DailyGoal(2), new WeeklyGoal(5)))
 
         expect:
-        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(booksCategory, LocalDate.now()) == dailyBookGoalfinished
-        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(codingCategory, LocalDate.now()) == dailyCodingGoalFinished
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(CATEGORY_BOOK, LocalDate.now()) == dailyBookGoalfinished
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(CATEGORY_CODING, LocalDate.now()) == dailyCodingGoalFinished
 
         where:
         sessions                      || dailyBookGoalfinished || dailyCodingGoalFinished
@@ -135,10 +136,10 @@ class PomodoroTrackerSpecification extends Specification {
     def "Should achieve weekly goal of pomodoros"() {
         setup:
         pomodoroTracker.saveSessions(sessions)
-        pomodoroTracker.setWeeklyGoalRepository(new WeeklyGoal(5, userId))
+        pomodoroTracker.setWeeklyGoal(new WeeklyGoal(5))
 
         expect:
-        pomodoroTracker.weeklyGoalFinishedForDate(ZonedDateTime.now(),userId) == weeklyGoalFinished
+        pomodoroTracker.weeklyGoalFinishedForDate(ZonedDateTime.now()) == weeklyGoalFinished
 
         where:
         sessions                 || weeklyGoalFinished
@@ -147,14 +148,26 @@ class PomodoroTrackerSpecification extends Specification {
     }
 
     def "Daily Goal should be created for a particular User"() {
-        given: "A user id: " + userId
+        given:
         def dailyGoalNumberOfSessions = 3
 
         when:
-        pomodoroTracker.editDailyGoal(new DailyGoal(userId, dailyGoalNumberOfSessions))
+        pomodoroTracker.editDailyGoal(new DailyGoal(dailyGoalNumberOfSessions))
 
         then:
-        pomodoroTracker.userDailyGoalSessionsNumber(userId) == dailyGoalNumberOfSessions
+        pomodoroTracker.userDailyGoalSessionsNumber() == dailyGoalNumberOfSessions
+    }
+
+    def "Should create category with weekly goal"() {
+        given:
+        def numberOfSessionsToFulfill = 10
+        when:
+        pomodoroTracker.createCategory(new PomodoroCategory("book", new DailyGoal(1), new WeeklyGoal(numberOfSessionsToFulfill)))
+
+        then:
+        def categoriesCreatedByUser = pomodoroTracker.categoriesCreatedByUser() as List<PomodoroCategory>
+        categoriesCreatedByUser.any { category -> category.sessionsToCompleteWeeklyGoal() == numberOfSessionsToFulfill }
+
     }
 
     private static List<PomodoroSession> booksFailedCodingFailed() {
@@ -197,12 +210,12 @@ class PomodoroTrackerSpecification extends Specification {
 
     private static List<PomodoroSession> sevenCompletedThisWeek() {
         [
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(6)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(5)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(4)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(3)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(2)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(1)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
+                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
                 bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
         ]
     }
