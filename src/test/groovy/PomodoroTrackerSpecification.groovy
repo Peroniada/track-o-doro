@@ -1,5 +1,4 @@
 import com.sperek.trackodoro.PomodoroSession
-import com.sperek.trackodoro.PomodoroSessionBuilder
 import com.sperek.trackodoro.PomodoroTracker
 import com.sperek.trackodoro.PomodoroTrackerConfig
 import com.sperek.trackodoro.category.PomodoroCategory
@@ -10,16 +9,16 @@ import spock.lang.Specification
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
+import static SessionsDSL.*
+
 class PomodoroTrackerSpecification extends Specification {
 
     private static final CATEGORY_CODING = "Coding"
     private static final CATEGORY_BOOK = "Book"
 
+    private final UUID ownerId = UUID.fromString("37868076-7232-4067-bb27-2d2e00acf390")
 
     private PomodoroTracker pomodoroTracker
-    private static final Closure<ZonedDateTime> dateMinusDays = {
-        Long days -> ZonedDateTime.now().minusDays(days)
-    }
 
     def setup() {
         setup:
@@ -28,13 +27,13 @@ class PomodoroTrackerSpecification extends Specification {
 
     def "Should save a pomodoro session"() {
         given:
-        def pomodoroSession = defaultSessionBuilder().build()
+        def pomodoroSession = defaultSessionBuilder().withOwnerId(ownerId).build()
 
         when:
         pomodoroTracker.saveSession(pomodoroSession)
 
         then:
-        pomodoroTracker.allSessions().contains(pomodoroSession)
+        pomodoroTracker.allUserSessions(ownerId).contains(pomodoroSession)
     }
 
     def "Should return a sessions with given category"() {
@@ -169,117 +168,40 @@ class PomodoroTrackerSpecification extends Specification {
         categoriesCreatedByUser.any { category -> category.sessionsToCompleteWeeklyGoal() == numberOfSessionsToFulfill }
 
     }
+    def "Should get sessions from user"() {
+        given:
+        def userId = ownerId
+        def sessions = [
+                defaultSessionBuilder().withOwnerId(userId).build(),
+                defaultSessionBuilder().withOwnerId(userId).build(),
+                defaultSessionBuilder().withOwnerId(userId).build(),
+                defaultSessionBuilder().withOwnerId(userId).build()
+        ]
+        sessions.addAll(sessionCollectionOf(5))
+        pomodoroTracker.saveSessions(sessions)
 
-    private static List<PomodoroSession> booksFailedCodingFailed() {
-        [todayBookSession(), yesterdayBookSession(), todayCodingSession(), yesterdayCodingSession()]
+        when:
+        def retrievedSessions = pomodoroTracker.allUserSessions(userId)
+
+        then:
+        retrievedSessions.every { session -> (session.sessionsOwner() == userId) }
     }
 
-    private static List<PomodoroSession> booksFinishedCodingFinished() {
-        [todayBookSession(), todayBookSession(), todayCodingSession(), todayCodingSession()]
-    }
-
-    private static List<PomodoroSession> booksFailedCodingFinished() {
-        [todayCodingSession(), todayCodingSession(), yesterdayBookSession()]
-    }
-
-    private static List<PomodoroSession> booksFinishedCodingFailed() {
-        [todayBookSession(), todayBookSession(), yesterdayBookSession()]
-    }
-
-    private static PomodoroSession yesterdayCodingSession() {
-        codingSessionBuilder().withOccurrence(yesterdayDateTime()).build()
-    }
-
-    private static PomodoroSession yesterdayBookSession() {
-        bookSessionBuilder().withOccurrence(yesterdayDateTime()).build()
-    }
-
-    private static PomodoroSession todayCodingSession() {
-        codingSessionBuilder().build()
-    }
-
-    private static PomodoroSession todayBookSession() {
-        bookSessionBuilder().build()
-    }
-
-    private static Collection<PomodoroSession> sessionCollectionOf(int i) {
+    def "Should get number of sessions grouped by category"() {
+        given:
+        SessionCollectionBuilder makeSessions = new SessionCollectionBuilder()
         Collection<PomodoroSession> sessions = []
-        (1..i).each { sessions.add(todaySessionBuilder().build()) }
-        sessions
+        sessions.addAll(makeSessions.withName("DDD").withCategory(CATEGORY_BOOK).getAmountOf(5))
+        sessions.addAll(makeSessions.withName("My new App").withCategory(CATEGORY_CODING).getAmountOf(4))
+        pomodoroTracker.saveSessions(sessions)
+
+        when:
+        def summary = pomodoroTracker.sessionsSummaryForUser(ownerId)
+
+        then:
+        summary == [Book: 5L, Coding: 4L]
     }
 
-    private static List<PomodoroSession> sevenCompletedThisWeek() {
-        [
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(0)).build(),
-        ]
-    }
-
-    private static List<PomodoroSession> threeCompletedThisWeek() {
-        [
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(10L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(10L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(9L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(7L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(3L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(2L)).build(),
-                bookSessionBuilder().withOccurrence(dateMinusDays.call(2L)).build()
-        ]
-    }
-
-    private static PomodoroSessionBuilder todaySessionBuilder() {
-        pomodoroSessionBuilderWithOccurrence(todayDateTime())
-    }
-
-    private static PomodoroSessionBuilder codingSessionBuilder() {
-        pomodoroSessionBuilderWithCategory(CATEGORY_CODING)
-    }
-
-    private static PomodoroSessionBuilder bookSessionBuilder() {
-        pomodoroSessionBuilderWithCategory(CATEGORY_BOOK)
-    }
-
-    private static PomodoroSessionBuilder pomodoroSessionBuilderWithOccurrence(ZonedDateTime dateTime) {
-        defaultSessionBuilder().withOccurrence(dateTime)
-    }
-
-    private static PomodoroSessionBuilder pomodoroSessionBuilderWithCategory(String booksCategory) {
-        defaultSessionBuilder().withCategory(booksCategory)
-    }
-
-    private static PomodoroSessionBuilder defaultSessionBuilder() {
-        PomodoroSessionBuilder
-                .aPomodoroSession()
-                .withActivityName("Book Reading")
-                .withCategory(CATEGORY_BOOK)
-                .withDuration(25)
-                .withOccurrence(ZonedDateTime.now())
-                .withId(UUID.randomUUID())
-    }
-
-    private static LocalDate yesterday() {
-        yesterdayDateTime().toLocalDate()
-    }
-
-    private static LocalDate today() {
-        todayDateTime().toLocalDate()
-    }
-
-    private static ZonedDateTime yesterdayDateTime() {
-        ZonedDateTime.now().minusDays(1)
-    }
-
-    private static ZonedDateTime todayDateTime() {
-        ZonedDateTime.now()
-    }
+    
 
 }

@@ -10,14 +10,16 @@ public class PomodoroSession {
   private final Integer duration;
   private final ZonedDateTime occurrence;
   private final UUID id;
+  private final UUID ownerId;
 
   PomodoroSession(String activityName, String category, Integer duration,
-      ZonedDateTime occurrence, UUID id) {
+      ZonedDateTime occurrence, UUID id, UUID ownerId) {
     this.activityName = activityName;
     this.category = category;
     this.duration = duration;
     this.occurrence = occurrence;
     this.id = id;
+    this.ownerId = ownerId;
   }
 
   public String getActivityName() {
@@ -34,6 +36,10 @@ public class PomodoroSession {
 
   public ZonedDateTime getOccurrence() {
     return occurrence;
+  }
+
+  public UUID sessionsOwner() {
+    return this.ownerId;
   }
 
   UUID getId() {
