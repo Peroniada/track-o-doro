@@ -1,12 +1,15 @@
 import com.sperek.trackodoro.PomodoroSession
 import com.sperek.trackodoro.PomodoroSessionBuilder
+import com.sperek.trackodoro.category.PomodoroCategory
+import com.sperek.trackodoro.goal.DailyGoal
+import com.sperek.trackodoro.goal.WeeklyGoal
 
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
 class SessionsDSL {
-    static final CATEGORY_CODING = "Coding"
-    static final CATEGORY_BOOK = "Book"
+    static final CATEGORY_CODING = new PomodoroCategory("Coding", new DailyGoal(3), new WeeklyGoal(9))
+    static final CATEGORY_BOOK = new PomodoroCategory("Book", new DailyGoal(3), new WeeklyGoal(9))
     static final Closure<ZonedDateTime> dateMinusDays = { Long days -> ZonedDateTime.now().minusDays(days) }
     static final UUID ownerId = UUID.fromString("37868076-7232-4067-bb27-2d2e00acf390")
     
@@ -92,7 +95,7 @@ class SessionsDSL {
         defaultSessionBuilder().withOccurrence(dateTime)
     }
 
-    static PomodoroSessionBuilder pomodoroSessionBuilderWithCategory(String booksCategory) {
+    static PomodoroSessionBuilder pomodoroSessionBuilderWithCategory(PomodoroCategory booksCategory) {
         defaultSessionBuilder().withCategory(booksCategory)
     }
 

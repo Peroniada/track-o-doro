@@ -1,18 +1,20 @@
 package com.sperek.trackodoro;
 
+import com.sperek.trackodoro.category.PomodoroCategory;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class PomodoroSession {
 
   private final String activityName;
-  private final String category;
+  private final PomodoroCategory category;
   private final Integer duration;
   private final ZonedDateTime occurrence;
   private final UUID id;
   private final UUID ownerId;
 
-  PomodoroSession(String activityName, String category, Integer duration,
+  PomodoroSession(String activityName, PomodoroCategory category, Integer duration,
       ZonedDateTime occurrence, UUID id, UUID ownerId) {
     this.activityName = activityName;
     this.category = category;
@@ -27,7 +29,7 @@ public class PomodoroSession {
   }
 
   public String getCategory() {
-    return category;
+    return category.getCategoryName();
   }
 
   public Integer getDuration() {

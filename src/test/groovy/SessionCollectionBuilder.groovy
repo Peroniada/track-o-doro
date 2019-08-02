@@ -1,5 +1,6 @@
 import com.sperek.trackodoro.PomodoroSession
 import com.sperek.trackodoro.PomodoroSessionBuilder
+import com.sperek.trackodoro.category.PomodoroCategory
 
 import java.time.ZonedDateTime
 
@@ -9,7 +10,7 @@ class SessionCollectionBuilder {
 
     PomodoroSessionBuilder builder = defaultSessionBuilder()
 
-    def withCategory(String category) {
+    def withCategory(PomodoroCategory category) {
         builder.withCategory(category)
         this
     }
