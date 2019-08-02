@@ -6,6 +6,7 @@ import com.sperek.trackodoro.goal.Goal;
 import com.sperek.trackodoro.goal.WeeklyGoal;
 import com.sperek.trackodoro.sessionFilter.CategorySpecification;
 import com.sperek.trackodoro.sessionFilter.DateSpecification;
+import com.sperek.trackodoro.sessionFilter.OwnerSpecification;
 import com.sperek.trackodoro.sessionFilter.WeekOfYearSpecification;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PomodoroTracker {
@@ -38,8 +40,8 @@ public class PomodoroTracker {
     sessionRepository.saveAll(sessions);
   }
 
-  public Collection<PomodoroSession> allSessions() {
-    return sessionRepository.findAll();
+  public Collection<PomodoroSession> allUserSessions(UUID ownerId) {
+    return findSatisfyingSessions(new OwnerSpecification(ownerId));
   }
 
   public Collection<PomodoroSession> sessionsByCategory(String category) {
@@ -92,10 +94,23 @@ public class PomodoroTracker {
     return dailyGoalOfUser().getNumberOfSessionsToFulfill();
   }
 
+  public void createCategory(PomodoroCategory pomodoroCategory) {
+    String categoryName = pomodoroCategory.getCategoryName();
+    categories.putIfAbsent(categoryName, pomodoroCategory);
+  }
+
+  public Collection<PomodoroCategory> categoriesCreatedByUser() {
+    return categories.values();
+  }
+
+  public Map<String, Long> sessionsSummaryForUser(UUID ownerId) {
+    return allUserSessions(ownerId).stream()
+        .collect(Collectors.groupingBy(PomodoroSession::getCategory, Collectors.counting()));
+  }
+
   private PomodoroCategory categoryDailyGoal(String category) {
     return categories.get(category);
   }
-
 
   private Goal dailyGoalOfUser() {
     return dailyGoal;
@@ -111,15 +126,6 @@ public class PomodoroTracker {
 
   private List<PomodoroSession> findSatisfyingSessions(
       Specification<PomodoroSession> specification) {
-    return allSessions().stream().filter(specification::isSatisfiedBy).collect(Collectors.toList());
-  }
-
-  public void createCategory(PomodoroCategory pomodoroCategory) {
-    String categoryName = pomodoroCategory.getCategoryName();
-    categories.putIfAbsent(categoryName, pomodoroCategory);
-  }
-
-  public Collection<PomodoroCategory> categoriesCreatedByUser() {
-    return categories.values();
+    return sessionRepository.findAll().stream().filter(specification::isSatisfiedBy).collect(Collectors.toList());
   }
 }

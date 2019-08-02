@@ -10,6 +10,7 @@ public final class PomodoroSessionBuilder {
   private Integer duration;
   private ZonedDateTime occurrence;
   private UUID id;
+  private UUID ownerId;
 
   private PomodoroSessionBuilder() {
   }
@@ -43,7 +44,12 @@ public final class PomodoroSessionBuilder {
     return this;
   }
 
+  public PomodoroSessionBuilder withOwnerId(UUID ownerId) {
+    this.ownerId = ownerId;
+    return this;
+  }
+
   public PomodoroSession build() {
-    return new PomodoroSession(activityName, category, duration, occurrence, id);
+    return new PomodoroSession(activityName, category, duration, occurrence, id, ownerId);
   }
 }
