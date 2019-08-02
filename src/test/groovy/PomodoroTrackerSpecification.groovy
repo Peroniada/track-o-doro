@@ -13,9 +13,6 @@ import static SessionsDSL.*
 
 class PomodoroTrackerSpecification extends Specification {
 
-    private static final CATEGORY_CODING = "Coding"
-    private static final CATEGORY_BOOK = "Book"
-
     private final UUID ownerId = UUID.fromString("37868076-7232-4067-bb27-2d2e00acf390")
 
     private PomodoroTracker pomodoroTracker
@@ -45,11 +42,11 @@ class PomodoroTrackerSpecification extends Specification {
         pomodoroTracker.saveSession(booksPomodoroSession)
         pomodoroTracker.saveSession(codingPomodoroSession)
         def booksCategory = CATEGORY_BOOK
-        def sessionsByCategory = pomodoroTracker.sessionsByCategory(booksCategory)
+        def sessionsByCategory = pomodoroTracker.sessionsByCategory(booksCategory.getCategoryName())
 
         then:
         sessionsByCategory.size() == 1
-        sessionsByCategory.first().getCategory() == booksCategory
+        sessionsByCategory.first().getCategory() == booksCategory.categoryName
     }
 
     def "Should count sessions by category"() {
@@ -60,8 +57,8 @@ class PomodoroTrackerSpecification extends Specification {
         pomodoroTracker.saveSessions(sessions)
 
         then:
-        pomodoroTracker.countSessionsByCategory(CATEGORY_BOOK) == 2
-        pomodoroTracker.countSessionsByCategory(CATEGORY_CODING) == 1
+        pomodoroTracker.countSessionsByCategory(CATEGORY_BOOK.categoryName) == 2
+        pomodoroTracker.countSessionsByCategory(CATEGORY_CODING.categoryName) == 1
     }
 
     def "Should count sessions by date"() {
@@ -89,7 +86,7 @@ class PomodoroTrackerSpecification extends Specification {
         pomodoroTracker.saveSessions(sessions)
 
         expect:
-        pomodoroTracker.countSessionsByDateAndCategory(day, category) == expectedNumberOfSessions
+        pomodoroTracker.countSessionsByDateAndCategory(day, category.categoryName) == expectedNumberOfSessions
 
         where:
         day         | category        || expectedNumberOfSessions
@@ -116,12 +113,12 @@ class PomodoroTrackerSpecification extends Specification {
     def "Should achieve daily goal by category"() {
         setup:
         pomodoroTracker.saveSessions(sessions)
-        pomodoroTracker.createCategory(new PomodoroCategory(CATEGORY_BOOK, new DailyGoal(2), new WeeklyGoal(5)))
-        pomodoroTracker.createCategory(new PomodoroCategory(CATEGORY_CODING, new DailyGoal(2), new WeeklyGoal(5)))
+        pomodoroTracker.createCategory(new PomodoroCategory(CATEGORY_BOOK.categoryName, new DailyGoal(2), new WeeklyGoal(5)))
+        pomodoroTracker.createCategory(new PomodoroCategory(CATEGORY_CODING.categoryName, new DailyGoal(2), new WeeklyGoal(5)))
 
         expect:
-        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(CATEGORY_BOOK, LocalDate.now()) == dailyBookGoalfinished
-        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(CATEGORY_CODING, LocalDate.now()) == dailyCodingGoalFinished
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(CATEGORY_BOOK.categoryName, LocalDate.now()) == dailyBookGoalfinished
+        pomodoroTracker.dailyPomodoroGoalForCategoryFinished(CATEGORY_CODING.categoryName, LocalDate.now()) == dailyCodingGoalFinished
 
         where:
         sessions                      || dailyBookGoalfinished || dailyCodingGoalFinished
@@ -201,7 +198,5 @@ class PomodoroTrackerSpecification extends Specification {
         then:
         summary == [Book: 5L, Coding: 4L]
     }
-
-    
 
 }
