@@ -1,6 +1,4 @@
-package com.sperek.trackodoro;
-
-import com.sperek.trackodoro.category.PomodoroCategory;
+package com.sperek.trackodoro.tracker.session;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -8,7 +6,7 @@ import java.util.UUID;
 public final class PomodoroSessionBuilder {
 
   private String activityName;
-  private PomodoroCategory category;
+  private String category;
   private Integer duration;
   private ZonedDateTime occurrence;
   private UUID id;
@@ -26,7 +24,7 @@ public final class PomodoroSessionBuilder {
     return this;
   }
 
-  public PomodoroSessionBuilder withCategory(PomodoroCategory category) {
+  public PomodoroSessionBuilder withCategory(String category) {
     this.category = category;
     return this;
   }
