@@ -1,7 +1,8 @@
 package com.sperek.trackodoro.sessionFilter;
 
-import com.sperek.trackodoro.PomodoroSession;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
+import com.sperek.trackodoro.tracker.session.PomodoroSession;
+
 import java.time.ZonedDateTime;
 import java.time.temporal.WeekFields;
 import java.util.Locale;

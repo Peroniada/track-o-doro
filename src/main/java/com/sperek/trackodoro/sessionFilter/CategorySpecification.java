@@ -1,7 +1,7 @@
 package com.sperek.trackodoro.sessionFilter;
 
-import com.sperek.trackodoro.PomodoroSession;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
+import com.sperek.trackodoro.tracker.session.PomodoroSession;
 
 public class CategorySpecification implements Specification<PomodoroSession> {
 
@@ -13,7 +13,7 @@ public class CategorySpecification implements Specification<PomodoroSession> {
 
   @Override
   public boolean isSatisfiedBy(PomodoroSession pomodoroSession) {
-    String sessionCategory = pomodoroSession.getCategory();
+    String sessionCategory = pomodoroSession.sessionCategoryName();
     return requiredCategory.equals(sessionCategory);
   }
 }

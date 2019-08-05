@@ -1,7 +1,7 @@
 package com.sperek.trackodoro.sessionFilter;
 
-import com.sperek.trackodoro.PomodoroSession;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
+import com.sperek.trackodoro.tracker.session.PomodoroSession;
 
 import java.util.UUID;
 
