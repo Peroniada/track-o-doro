@@ -184,6 +184,23 @@ class PomodoroTrackerSpecification extends Specification {
         retrievedSessions.every { session -> (session.sessionsOwner() == userId) }
     }
 
+
+    def "Should edit category weekly goal"() {
+        given:
+        def numberOfSessionsToFulfill = 2
+        def weeklyGoal = new WeeklyGoal(numberOfSessionsToFulfill)
+        def dailyGoal = new DailyGoal(numberOfSessionsToFulfill)
+        def bookCategory = new PomodoroCategory("book", dailyGoal, weeklyGoal)
+        pomodoroTracker.createCategory(bookCategory)
+        def expectedWeeklyGoal = new WeeklyGoal(10)
+        def categoryName = bookCategory.getCategoryName()
+        when:
+        pomodoroTracker.editWeeklyGoalForCategory(categoryName, expectedWeeklyGoal)
+        then:
+        def bookCategoryWeeklyGoalSessions = pomodoroTracker.weeklyGoalForCategory(categoryName)
+        expectedWeeklyGoal.numberOfSessionsToFulfill == bookCategoryWeeklyGoalSessions
+    }
+
     def "Should get number of sessions grouped by category"() {
         given:
         SessionCollectionBuilder makeSessions = new SessionCollectionBuilder()

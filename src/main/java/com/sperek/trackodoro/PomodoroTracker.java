@@ -94,18 +94,17 @@ public class PomodoroTracker {
     return dailyGoalOfUser().getNumberOfSessionsToFulfill();
   }
 
-  public void createCategory(PomodoroCategory pomodoroCategory) {
-    String categoryName = pomodoroCategory.getCategoryName();
-    categories.putIfAbsent(categoryName, pomodoroCategory);
-  }
-
-  public Collection<PomodoroCategory> categoriesCreatedByUser() {
-    return categories.values();
-  }
-
   public Map<String, Long> sessionsSummaryForUser(UUID ownerId) {
     return allUserSessions(ownerId).stream()
         .collect(Collectors.groupingBy(PomodoroSession::getCategory, Collectors.counting()));
+  }
+
+  public Integer weeklyGoalForCategory(String category) {
+    return categories.get(category).sessionsToCompleteWeeklyGoal();
+  }
+
+  public void editWeeklyGoalForCategory(String categoryName, WeeklyGoal weeklyGoal) {
+    categories.get(categoryName).editWeeklyGoal(weeklyGoal);
   }
 
   private PomodoroCategory categoryDailyGoal(String category) {
@@ -127,5 +126,14 @@ public class PomodoroTracker {
   private List<PomodoroSession> findSatisfyingSessions(
       Specification<PomodoroSession> specification) {
     return sessionRepository.findAll().stream().filter(specification::isSatisfiedBy).collect(Collectors.toList());
+  }
+
+  public void createCategory(PomodoroCategory pomodoroCategory) {
+    String categoryName = pomodoroCategory.getCategoryName();
+    categories.putIfAbsent(categoryName, pomodoroCategory);
+  }
+
+  public Collection<PomodoroCategory> categoriesCreatedByUser() {
+    return categories.values();
   }
 }

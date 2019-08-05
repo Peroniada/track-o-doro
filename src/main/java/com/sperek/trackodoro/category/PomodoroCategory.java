@@ -1,6 +1,7 @@
 package com.sperek.trackodoro.category;
 
 import com.sperek.trackodoro.goal.Goal;
+import com.sperek.trackodoro.goal.WeeklyGoal;
 
 public class PomodoroCategory {
   private String categoryName;
@@ -26,5 +27,9 @@ public class PomodoroCategory {
 
   public void editDailyGoal(Goal newDailyGoal) {
     this.dailyGoal = newDailyGoal;
+  }
+
+  public void editWeeklyGoal(WeeklyGoal weeklyGoal) {
+    this.weeklyGoal = weeklyGoal;
   }
 }
