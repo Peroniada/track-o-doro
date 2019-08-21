@@ -5,7 +5,6 @@ import com.sperek.trackodoro.goal.DailyGoal;
 import com.sperek.trackodoro.goal.WeeklyGoal;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class PomodoroCategoryEngineImpl implements PomodoroCategoryEngine {
 
@@ -17,25 +16,25 @@ public class PomodoroCategoryEngineImpl implements PomodoroCategoryEngine {
   }
 
   @Override
-  public Integer dailyGoalForCategory(String categoryName) {
-    return categoryByName(categoryName).sessionsToCompleteDailyGoal();
+  public Integer dailyGoalForCategory(UUID ownerId, String categoryName) {
+    return categoryByName(ownerId, categoryName).sessionsToCompleteDailyGoal();
   }
 
   @Override
-  public Integer weeklyGoalForCategory(String categoryName) {
-    return categoryByName(categoryName).sessionsToCompleteWeeklyGoal();
+  public Integer weeklyGoalForCategory(UUID ownerId, String categoryName) {
+    return categoryByName(ownerId, categoryName).sessionsToCompleteWeeklyGoal();
   }
 
   @Override
-  public void editDailyGoalForCategory(String categoryName, DailyGoal dailyGoal) {
-    final PomodoroCategory pomodoroCategory = categoryByName(categoryName);
+  public void editDailyGoalForCategory(UUID ownerId, String categoryName, DailyGoal dailyGoal) {
+    final PomodoroCategory pomodoroCategory = categoryByName(ownerId, categoryName);
     pomodoroCategory.editDailyGoal(dailyGoal);
     categoryRepository.save(pomodoroCategory);
   }
 
   @Override
-  public void editWeeklyGoalForCategory(String categoryName, WeeklyGoal weeklyGoal) {
-    final PomodoroCategory pomodoroCategory = categoryRepository.findByName(categoryName);
+  public void editWeeklyGoalForCategory(UUID ownerId, String categoryName, WeeklyGoal weeklyGoal) {
+    final PomodoroCategory pomodoroCategory = categoryRepository.findByName(ownerId, categoryName);
     pomodoroCategory.editWeeklyGoal(weeklyGoal);
   }
 
@@ -46,11 +45,11 @@ public class PomodoroCategoryEngineImpl implements PomodoroCategoryEngine {
 
   @Override
   public Collection<PomodoroCategory> categoriesCreatedByUser(UUID ownerId) {
-    return categoryRepository.findAll().stream().filter(category -> category.getOwnerId().equals(ownerId)).collect(
-        Collectors.toSet());
+    return categoryRepository.findAll(ownerId);
   }
 
-  private PomodoroCategory categoryByName(String categoryName) {
-    return categoryRepository.findByName(categoryName);
+  @Override
+  public PomodoroCategory categoryByName(UUID ownerId, String categoryName) {
+    return categoryRepository.findByName(ownerId, categoryName);
   }
 }

@@ -2,15 +2,16 @@ package com.sperek.trackodoro.tracker.category;
 
 import com.sperek.trackodoro.category.PomodoroCategory;
 import java.util.Collection;
+import java.util.UUID;
 
 public interface PomodoroCategoryRepository {
 
-  PomodoroCategory findByName(String name);
+  PomodoroCategory findByName(UUID ownerId, String name);
 
   void save(PomodoroCategory pomodoroCategory);
 
-  Collection<PomodoroCategory> findAll();
+  Collection<PomodoroCategory> findAll(UUID ownerId);
 
-  void delete(String category);
+  void delete(UUID ownerId, String category);
 
 }

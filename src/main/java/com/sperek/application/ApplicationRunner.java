@@ -1,5 +1,9 @@
 package com.sperek.application;
 
+import static io.javalin.apibuilder.ApiBuilder.get;
+import static io.javalin.apibuilder.ApiBuilder.path;
+import static io.javalin.apibuilder.ApiBuilder.post;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sperek.application.controller.CategoryController;
@@ -7,14 +11,15 @@ import com.sperek.application.controller.GoalController;
 import com.sperek.application.controller.SessionController;
 import com.sperek.application.controller.UserController;
 import io.javalin.Javalin;
+import io.javalin.apibuilder.EndpointGroup;
+import io.javalin.core.util.RouteOverviewPlugin;
 import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.swagger.v3.oas.models.info.Info;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-
-import static io.javalin.apibuilder.ApiBuilder.*;
+import org.jetbrains.annotations.NotNull;
 
 public class ApplicationRunner implements Runnable {
 
@@ -35,18 +40,28 @@ public class ApplicationRunner implements Runnable {
   @Override
   public void run() {
     Javalin app = Javalin
-        .create(config -> config.registerPlugin(new OpenApiPlugin(getOpenApiOptions())))
-        .start(8891);
+        .create(config -> {
+          config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
+          config.registerPlugin(new RouteOverviewPlugin("routes"));
+        }).start(8891);
+
     Gson gson = new GsonBuilder()
         .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeJsonDeserializer())
         .registerTypeAdapter(LocalDate.class, new LocalDateJsonDeserializer())
         .create();
     JavalinJson.setFromJsonMapper(gson::fromJson);
     JavalinJson.setToJsonMapper(gson::toJson);
+    app.routes(sessionRoutes());
+    app.routes(categoryRoutes());
 
-    app.routes(() -> {
+    app.get("/dailyGoalFinished", goalController.dailyPomodoroGoalFinished);
+  }
+
+  @NotNull
+  private EndpointGroup sessionRoutes() {
+    return () -> {
       path("sessions", () -> {
-        get(sessionController.allUserSessions);
+        get(sessionController.getSessions);
         post(sessionController.saveSession);
         path("count", () -> {
           get(sessionController.countSessions);
@@ -58,11 +73,27 @@ public class ApplicationRunner implements Runnable {
           get(sessionController.getSession);
         });
       });
-    });
+    };
+  }
 
-    app.get("/dailyGoalFinished", goalController.dailyPomodoroGoalFinished);
-    app.get("/dailyGoalForCategoryFinished", goalController.dailyPomodoroGoalForCategoryFinished);
-
+  private EndpointGroup categoryRoutes() {
+    return () -> {
+      path("categories", () -> {
+        get(categoryController.categoriesCreatedByUser);
+        post(categoryController.createCategory);
+        path(":categoryName", () -> {
+          get(categoryController.getCategory);
+          path("goals", () -> {
+            path("daily", () -> {
+              get(":onDate", categoryController.dailyGoalFinished);
+            });
+            path("weekly", () -> {
+              get(":weekNumber", categoryController.weeklyGoalFinished);
+            });
+          });
+        });
+      });
+    };
   }
 
   private OpenApiOptions getOpenApiOptions() {
