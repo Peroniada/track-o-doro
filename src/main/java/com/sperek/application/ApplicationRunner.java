@@ -46,7 +46,7 @@ public class ApplicationRunner implements Runnable {
 
     app.routes(() -> {
       path("sessions", () -> {
-        get(sessionController.allUserSessions);
+        get(sessionController.getSessions);
         post(sessionController.saveSession);
         path("count", () -> {
           get(sessionController.countSessions);

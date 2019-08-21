@@ -139,6 +139,6 @@ public class PomodoroTracker {
   }
 
   public Integer countSessions(Specification<PomodoroSession> sessionSpecification) {
-    return 2;
+    return sessionEngine.findSatisfyingSessions(sessionSpecification).size();
   }
 }
