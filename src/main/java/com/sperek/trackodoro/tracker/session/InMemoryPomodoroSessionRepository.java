@@ -1,4 +1,4 @@
-package com.sperek.trackodoro;
+package com.sperek.trackodoro.tracker.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +25,11 @@ public class InMemoryPomodoroSessionRepository implements PomodoroSessionReposit
   public Collection<PomodoroSession> saveAll(Collection<PomodoroSession> sessions) {
     sessions.forEach(this::save);
     return sessions;
+  }
+
+  @Override
+  public PomodoroSession getOne(UUID sessionId) {
+    return pomodoroSessions.get(sessionId);
   }
 
 }

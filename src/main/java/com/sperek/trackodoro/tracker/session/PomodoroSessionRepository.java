@@ -1,7 +1,8 @@
-package com.sperek.trackodoro;
+package com.sperek.trackodoro.tracker.session;
 
-import java.time.LocalDate;
+import com.sperek.trackodoro.tracker.session.PomodoroSession;
 import java.util.Collection;
+import java.util.UUID;
 
 public interface PomodoroSessionRepository {
 
@@ -11,4 +12,5 @@ public interface PomodoroSessionRepository {
 
   Collection<PomodoroSession> saveAll(Collection<PomodoroSession> sessions);
 
+  PomodoroSession getOne(UUID sessionId);
 }

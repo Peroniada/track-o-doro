@@ -1,0 +1,16 @@
+{
+  "activityName": "czytanie",
+  "category": {
+    "categoryName": "books",
+    "dailyGoal": {
+      "numberOfSessionsToFulfill": 2
+    },
+    "weeklyGoal": {
+      "numberOfSessionsToFulfill": 6
+    }
+  },
+  "duration": 25,
+  "occurrence": "2014-03-10T18:46:40.000Z",
+  "id": "f5186251-c228-4370-87f2-9d8bced798a4",
+  "ownerId": "f5186251-c228-4370-87f2-9d8bced798a5"
+}
