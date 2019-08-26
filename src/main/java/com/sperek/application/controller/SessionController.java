@@ -1,12 +1,20 @@
 package com.sperek.application.controller;
 
+import static io.javalin.apibuilder.ApiBuilder.get;
+import static io.javalin.apibuilder.ApiBuilder.path;
+import static io.javalin.apibuilder.ApiBuilder.post;
+import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.document;
+import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
+
 import com.sperek.application.controller.query.QueryResolver;
 import com.sperek.trackodoro.PomodoroSessionMapper;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 import com.sperek.trackodoro.tracker.PomodoroTracker;
 import com.sperek.trackodoro.tracker.dto.PomodoroSessionDTO;
 import com.sperek.trackodoro.tracker.session.PomodoroSession;
+import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.Handler;
+import io.javalin.plugin.openapi.dsl.OpenApiDocumentation;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class SessionController {
 
+  private final String CURRENT_USER_ID_HEADER_NAME = "Current-User";
   private PomodoroTracker tracker;
   private QueryResolver queryResolver;
   private Logger log = LoggerFactory.getLogger(SessionController.class);
@@ -26,7 +35,17 @@ public class SessionController {
     this.queryResolver = new QueryResolver();
   }
 
-  public Handler saveSession = ctx -> {
+  public EndpointGroup sessionRoutes() {
+    return sessionRoutes;
+  }
+
+  private OpenApiDocumentation saveSessionDoc = document()
+      .body(PomodoroSessionDTO.class)
+      .result("201")
+      .result("403")
+      .result("401");
+
+  private Handler saveSession = ctx -> {
     log.info(ctx.body());
     final PomodoroSessionDTO session = ctx.bodyAsClass(PomodoroSessionDTO.class);
 
@@ -34,28 +53,30 @@ public class SessionController {
     ctx.status(201);
   };
 
-  public Handler getSessions = ctx -> {
-    final UUID ownerId = UUID.fromString(Objects.requireNonNull(ctx.header("Current-User")));
-    final Specification<PomodoroSession> specification = queryResolver.resolve(ownerId, ctx.queryParamMap());
+  private Handler getSessions = ctx -> {
+    final UUID ownerId = UUID.fromString(Objects.requireNonNull(ctx.header(CURRENT_USER_ID_HEADER_NAME)));
+    final Specification<PomodoroSession> specification = queryResolver
+        .resolve(ownerId, ctx.queryParamMap());
     final Collection<PomodoroSession> sessions = tracker.findSatisfyingSessions(specification);
     ctx.json(sessionsToDTO(sessions));
     ctx.status(200);
   };
 
-  public Handler countSessions = ctx -> {
-    final UUID ownerId = UUID.fromString(Objects.requireNonNull(ctx.header("Current-User")));
-    Specification<PomodoroSession> specification = queryResolver.resolve(ownerId, ctx.queryParamMap());
+  private Handler countSessions = ctx -> {
+    final UUID ownerId = UUID.fromString(Objects.requireNonNull(ctx.header(CURRENT_USER_ID_HEADER_NAME)));
+    Specification<PomodoroSession> specification = queryResolver
+        .resolve(ownerId, ctx.queryParamMap());
     ctx.json(tracker.countSatisfyingSessions(specification));
     ctx.status(200);
   };
 
-  public Handler getSession = ctx -> {
-    tracker.getSession(UUID.fromString(ctx.pathParam("id")));
+  private Handler getSession = ctx -> {
+    final PomodoroSession session = tracker.getSession(UUID.fromString(ctx.pathParam("id")));
+    ctx.json(PomodoroSessionMapper.toDto.apply(session));
     ctx.status(200);
   };
-
-  public Handler sessionsSummaryForUser = ctx -> {
-    UUID ownerId = UUID.fromString(Optional.ofNullable(ctx.header("userId"))
+  private Handler sessionsSummaryForUser = ctx -> {
+    UUID ownerId = UUID.fromString(Optional.ofNullable(ctx.header(CURRENT_USER_ID_HEADER_NAME))
         .orElseThrow(() -> new RuntimeException("No userId provided")));
     ctx.json(tracker.sessionsSummaryForUser(ownerId));
     ctx.status(200);
@@ -65,4 +86,20 @@ public class SessionController {
     return sessions.stream().map(session -> PomodoroSessionMapper.toDto.apply(session)).collect(
         Collectors.toList());
   }
+
+  private EndpointGroup sessionRoutes = () -> {
+    path("sessions", () -> {
+      get(getSessions);
+      post(documented(saveSessionDoc, saveSession));
+      path("count", () -> {
+        get(countSessions);
+      });
+      path("summary", () -> {
+        get(sessionsSummaryForUser);
+      });
+      path(":id", () -> {
+        get(getSession);
+      });
+    });
+  };
 }

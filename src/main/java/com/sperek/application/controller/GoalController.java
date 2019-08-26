@@ -43,7 +43,6 @@ public class GoalController {
 
   };
 
-
   private LocalDate occurrenceFrom(String dateString) {
     return LocalDate.parse(Optional.ofNullable(dateString)
         .orElseThrow(() -> new RuntimeException("No date provided")));
