@@ -21,13 +21,6 @@ public class GoalController {
     ctx.status(200);
   };
 
-  public Handler dailyPomodoroGoalForCategoryFinished = ctx -> {
-    final String categoryName = ctx.queryParam("categoryName");
-    LocalDate occurrence = occurrenceFrom(ctx.queryParam("date"));
-    ctx.json(tracker.dailyPomodoroGoalForCategoryFinished(categoryName, occurrence));
-    ctx.status(200);
-  };
-
   Handler editWeeklyGoal = ctx -> {
     WeeklyGoal weeklyGoal = ctx.bodyAsClass(WeeklyGoal.class);
     tracker.editWeeklyGoal(weeklyGoal);
@@ -48,14 +41,6 @@ public class GoalController {
     ctx.status(200);
 
   };
-
-  public Handler weeklyGoalForCategory = ctx ->  {
-
-  };
-
-  public Handler editWeeklyGoalForCategory(String categoryName, WeeklyGoal weeklyGoal) {
-    return null;
-  }
 
   private LocalDate occurrenceFrom(String dateString) {
     return LocalDate.parse(Optional.ofNullable(dateString)

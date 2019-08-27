@@ -3,30 +3,37 @@ package com.sperek.trackodoro.tracker.category;
 import com.sperek.trackodoro.category.PomodoroCategory;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public class InMemoryPomodoroCategoryRepository implements PomodoroCategoryRepository {
 
-  private final Map<String, PomodoroCategory> categories = new HashMap<>();
+  private final Map<UUID, Set<PomodoroCategory>> categories = new HashMap<>();
 
   @Override
-  public PomodoroCategory findByName(String name) {
-    return Optional.ofNullable(categories.get(name)).orElseThrow(() -> new RuntimeException("Category not found"));
+  public PomodoroCategory findByName(UUID ownerId, String name) {
+    return categories.get(ownerId).stream()
+        .filter(category -> category.getCategoryName().equals(name)).findFirst()
+        .orElseThrow(() -> new RuntimeException("No category found"));
   }
 
   @Override
   public void save(PomodoroCategory pomodoroCategory) {
-    categories.put(pomodoroCategory.getCategoryName(), pomodoroCategory);
+    Set<PomodoroCategory> newSetWithCategory = new HashSet<>();
+    newSetWithCategory.add(pomodoroCategory);
+    categories.putIfAbsent(pomodoroCategory.getOwnerId(), newSetWithCategory);
+    categories.get(pomodoroCategory.getOwnerId()).add(pomodoroCategory);
   }
 
   @Override
-  public Collection<PomodoroCategory> findAll() {
-    return categories.values();
+  public Collection<PomodoroCategory> findAll(UUID ownerId) {
+    return categories.get(ownerId);
   }
 
   @Override
-  public void delete(String category) {
-    categories.remove(category);
+  public void delete(UUID ownerId, String category) {
+    categories.get(ownerId).removeIf(cat -> cat.getCategoryName().equals(category));
   }
 }

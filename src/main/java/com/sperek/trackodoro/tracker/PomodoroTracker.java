@@ -6,6 +6,7 @@ import com.sperek.trackodoro.goal.Goal;
 import com.sperek.trackodoro.goal.WeeklyGoal;
 import com.sperek.trackodoro.sessionFilter.CategorySpecification;
 import com.sperek.trackodoro.sessionFilter.DateSpecification;
+import com.sperek.trackodoro.sessionFilter.OwnerSpecification;
 import com.sperek.trackodoro.sessionFilter.WeekOfYearSpecification;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 import com.sperek.trackodoro.tracker.category.PomodoroCategoryEngine;
@@ -40,6 +41,10 @@ public class PomodoroTracker {
     sessionEngine.saveAll(sessions);
   }
 
+  public PomodoroSession getSession(UUID sessionId) {
+    return sessionEngine.getSession(sessionId);
+  }
+
   public Collection<PomodoroSession> findSatisfyingSessions(Specification<PomodoroSession> sessionSpecification) {
     return sessionEngine.findSatisfyingSessions(sessionSpecification);
   }
@@ -52,41 +57,28 @@ public class PomodoroTracker {
     return sessionEngine.allUserSessions(ownerId);
   }
 
-  public Collection<PomodoroSession> sessionsByCategory(String category) {
-    CategorySpecification specification = new CategorySpecification(category);
-    return sessionEngine.findSatisfyingSessions(specification);
-  }
-
-  public Integer countSessionsByCategory(String category) {
-    CategorySpecification specification = new CategorySpecification(category);
-    return sessionEngine.findSatisfyingSessions(specification).size();
-  }
-
-  public Integer countSessionsByDay(LocalDate occurrence) {
-    DateSpecification specification = new DateSpecification(occurrence);
-    return sessionEngine.findSatisfyingSessions(specification).size();
-  }
-
-  public Integer countSessionsByDateAndCategory(LocalDate date, String category) {
-    Specification<PomodoroSession> specification =
-        new DateSpecification(date).and(new CategorySpecification(category));
-    return sessionEngine.findSatisfyingSessions(specification).size();
-  }
-
   public Boolean dailyPomodoroGoalFinished(LocalDate date) {
-    return countSessionsByDay(date) >= (userDailyGoalSessionsNumber());
+    final DateSpecification sessionSpecification = new DateSpecification(date);
+    return countSatisfyingSessions(sessionSpecification) >= (userDailyGoalSessionsNumber());
   }
 
-  public Boolean dailyPomodoroGoalForCategoryFinished(String category, LocalDate date) {
-    Integer sessionsToCompleteDailyGoal = categoryEngine.dailyGoalForCategory(category);
-    return countSessionsByDateAndCategory(date, category) >= sessionsToCompleteDailyGoal;
+  public Boolean dailyPomodoroGoalForCategoryFinished(UUID ownerId, String category, LocalDate date) {
+    Integer sessionsToCompleteDailyGoal = categoryEngine.dailyGoalForCategory(ownerId, category);
+    Specification<PomodoroSession> specification = new OwnerSpecification(ownerId).and(new CategorySpecification(category).and(new DateSpecification(date)));
+    return countSatisfyingSessions(specification)>= sessionsToCompleteDailyGoal;
+  }
+
+  public Boolean weeklyPomodoroGoalForCategoryFinished(UUID ownerId, String category, LocalDate date) {
+    Integer sessionsToCompleteDailyGoal = categoryEngine.weeklyGoalForCategory(ownerId, category);
+    Specification<PomodoroSession> specification = new OwnerSpecification(ownerId).and(new CategorySpecification(category).and(new WeekOfYearSpecification(weekNumberOfDate(date))));
+    return countSatisfyingSessions(specification)>= sessionsToCompleteDailyGoal;
   }
 
   public void editWeeklyGoal(WeeklyGoal weeklyGoal) {
     this.weeklyGoal = weeklyGoal;
   }
 
-  public boolean weeklyGoalFinishedForDate(LocalDate dateTime) {
+  public Boolean weeklyGoalFinishedForDate(LocalDate dateTime) {
     final int week = weekNumberOfDate(dateTime);
     final Integer weeklyGoal = this.weeklyGoal.getNumberOfSessionsToFulfill();
     return weeklyGoal <= countSessionsForWeek(week);
@@ -106,16 +98,20 @@ public class PomodoroTracker {
             Collectors.groupingBy(PomodoroSession::sessionCategoryName, Collectors.counting()));
   }
 
-  public Integer weeklyGoalForCategory(String category) {
-    return categoryEngine.weeklyGoalForCategory(category);
+  public Integer weeklyGoalForCategory(UUID ownerId, String category) {
+    return categoryEngine.weeklyGoalForCategory(ownerId, category);
   }
 
-  public void editWeeklyGoalForCategory(String categoryName, WeeklyGoal weeklyGoal) {
-    categoryEngine.editWeeklyGoalForCategory(categoryName, weeklyGoal);
+  public void editWeeklyGoalForCategory(UUID ownerId, String categoryName, WeeklyGoal weeklyGoal) {
+    categoryEngine.editWeeklyGoalForCategory(ownerId, categoryName, weeklyGoal);
   }
 
   public void createCategory(PomodoroCategory pomodoroCategory) {
     categoryEngine.createCategory(pomodoroCategory);
+  }
+
+  public PomodoroCategory getCategory(UUID ownerId, String categoryName) {
+    return categoryEngine.categoryByName(ownerId, categoryName);
   }
 
   public Collection<PomodoroCategory> categoriesCreatedByUser(UUID ownerId) {
@@ -132,13 +128,5 @@ public class PomodoroTracker {
 
   private Integer countSessionsForWeek(Integer week) {
     return sessionEngine.findSatisfyingSessions(new WeekOfYearSpecification(week)).size();
-  }
-
-  public PomodoroSession getSession(UUID sessionId) {
-    return sessionEngine.getSession(sessionId);
-  }
-
-  public Integer countSessions(Specification<PomodoroSession> sessionSpecification) {
-    return sessionEngine.findSatisfyingSessions(sessionSpecification).size();
   }
 }

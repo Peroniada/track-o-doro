@@ -8,15 +8,18 @@ import java.util.UUID;
 
 public interface PomodoroCategoryEngine {
 
-  Integer dailyGoalForCategory(String categoryName);
+  Integer dailyGoalForCategory(UUID ownerId, String categoryName);
 
-  Integer weeklyGoalForCategory(String categoryName);
+  Integer weeklyGoalForCategory(UUID ownerId, String categoryName);
 
-  void editDailyGoalForCategory(String categoryName, DailyGoal dailyGoal);
+  void editDailyGoalForCategory(UUID ownerId, String categoryName, DailyGoal dailyGoal);
 
-  void editWeeklyGoalForCategory(String categoryName, WeeklyGoal weeklyGoal);
+  void editWeeklyGoalForCategory(UUID ownerId, String categoryName, WeeklyGoal weeklyGoal);
 
   void createCategory(PomodoroCategory pomodoroCategory);
 
   Collection<PomodoroCategory> categoriesCreatedByUser(UUID ownerId);
+
+  PomodoroCategory categoryByName(UUID ownerId, String categoryName);
+
 }
