@@ -12,9 +12,11 @@ import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 import com.sperek.trackodoro.tracker.PomodoroTracker;
 import com.sperek.trackodoro.tracker.dto.PomodoroSessionDTO;
 import com.sperek.trackodoro.tracker.session.PomodoroSession;
+
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.Handler;
 import io.javalin.plugin.openapi.dsl.OpenApiDocumentation;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 public class SessionController {
 
   private final String CURRENT_USER_ID_HEADER_NAME = "Current-User";
+
   private PomodoroTracker tracker;
   private QueryResolver queryResolver;
   private Logger log = LoggerFactory.getLogger(SessionController.class);
@@ -75,8 +78,9 @@ public class SessionController {
     ctx.json(PomodoroSessionMapper.toDto.apply(session));
     ctx.status(200);
   };
-  private Handler sessionsSummaryForUser = ctx -> {
-    UUID ownerId = UUID.fromString(Optional.ofNullable(ctx.header(CURRENT_USER_ID_HEADER_NAME))
+
+  public Handler sessionsSummaryForUser = ctx -> {
+    UUID ownerId = UUID.fromString(Optional.ofNullable(ctx.header("userId"))
         .orElseThrow(() -> new RuntimeException("No userId provided")));
     ctx.json(tracker.sessionsSummaryForUser(ownerId));
     ctx.status(200);
@@ -102,4 +106,5 @@ public class SessionController {
       });
     });
   };
+
 }

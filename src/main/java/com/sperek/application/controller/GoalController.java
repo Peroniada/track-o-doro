@@ -21,7 +21,6 @@ public class GoalController {
     ctx.status(200);
   };
 
-
   Handler editWeeklyGoal = ctx -> {
     WeeklyGoal weeklyGoal = ctx.bodyAsClass(WeeklyGoal.class);
     tracker.editWeeklyGoal(weeklyGoal);
