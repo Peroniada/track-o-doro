@@ -21,5 +21,4 @@ public interface PomodoroCategoryEngine {
   Collection<PomodoroCategory> categoriesCreatedByUser(UUID ownerId);
 
   PomodoroCategory categoryByName(UUID ownerId, String categoryName);
-
 }

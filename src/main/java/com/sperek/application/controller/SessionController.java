@@ -18,6 +18,7 @@ import io.javalin.http.Handler;
 import io.javalin.plugin.openapi.dsl.OpenApiDocumentation;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +44,7 @@ public class SessionController {
   }
 
   private OpenApiDocumentation saveSessionDoc = document()
+      .header(CURRENT_USER_ID_HEADER_NAME, String.class)
       .body(PomodoroSessionDTO.class)
       .result("201")
       .result("403")
@@ -56,6 +58,17 @@ public class SessionController {
     ctx.status(201);
   };
 
+  private OpenApiDocumentation getSessionsDoc = document()
+      .header(CURRENT_USER_ID_HEADER_NAME, String.class)
+      .queryParam("date", String.class)
+      .queryParam("fromDate", String.class)
+      .queryParam("toDate", String.class)
+      .queryParam("weekNumber", String.class)
+      .queryParam("category", String.class)
+      .jsonArray("200", PomodoroSessionDTO.class)
+      .result("401")
+      .result("403");
+
   private Handler getSessions = ctx -> {
     final UUID ownerId = UUID.fromString(Objects.requireNonNull(ctx.header(CURRENT_USER_ID_HEADER_NAME)));
     final Specification<PomodoroSession> specification = queryResolver
@@ -65,6 +78,17 @@ public class SessionController {
     ctx.status(200);
   };
 
+  private OpenApiDocumentation countSessionsDoc = document()
+      .header(CURRENT_USER_ID_HEADER_NAME, String.class)
+      .queryParam("date", String.class)
+      .queryParam("fromDate", String.class)
+      .queryParam("toDate", String.class)
+      .queryParam("weekNumber", String.class)
+      .queryParam("category", String.class)
+      .jsonArray("200", PomodoroSessionDTO.class)
+      .result("401")
+      .result("403");
+
   private Handler countSessions = ctx -> {
     final UUID ownerId = UUID.fromString(Objects.requireNonNull(ctx.header(CURRENT_USER_ID_HEADER_NAME)));
     Specification<PomodoroSession> specification = queryResolver
@@ -73,14 +97,27 @@ public class SessionController {
     ctx.status(200);
   };
 
+  private OpenApiDocumentation getSessionDoc = document()
+      .header(CURRENT_USER_ID_HEADER_NAME, String.class)
+      .pathParam("id", String.class)
+      .json("200", PomodoroSessionDTO.class)
+      .result("401")
+      .result("403");
+
   private Handler getSession = ctx -> {
     final PomodoroSession session = tracker.getSession(UUID.fromString(ctx.pathParam("id")));
     ctx.json(PomodoroSessionMapper.toDto.apply(session));
     ctx.status(200);
   };
 
-  public Handler sessionsSummaryForUser = ctx -> {
-    UUID ownerId = UUID.fromString(Optional.ofNullable(ctx.header("userId"))
+  private OpenApiDocumentation sessionSummaryDoc = document()
+      .header(CURRENT_USER_ID_HEADER_NAME, String.class)
+      .jsonArray("200", Map.class)
+      .result("401")
+      .result("403");
+
+  private Handler sessionsSummaryForUser = ctx -> {
+    UUID ownerId = UUID.fromString(Optional.ofNullable(ctx.header(CURRENT_USER_ID_HEADER_NAME))
         .orElseThrow(() -> new RuntimeException("No userId provided")));
     ctx.json(tracker.sessionsSummaryForUser(ownerId));
     ctx.status(200);
@@ -91,20 +128,14 @@ public class SessionController {
         Collectors.toList());
   }
 
-  private EndpointGroup sessionRoutes = () -> {
-    path("sessions", () -> {
-      get(getSessions);
-      post(documented(saveSessionDoc, saveSession));
-      path("count", () -> {
-        get(countSessions);
-      });
-      path("summary", () -> {
-        get(sessionsSummaryForUser);
-      });
-      path(":id", () -> {
-        get(getSession);
-      });
-    });
-  };
-
+  private EndpointGroup sessionRoutes = () -> path("sessions", () -> {
+    get(documented(getSessionsDoc,getSessions));
+    post(documented(saveSessionDoc, saveSession));
+    path("count", () ->
+        get(documented(countSessionsDoc, countSessions)));
+    path("summary", () ->
+        get(documented(sessionSummaryDoc, sessionsSummaryForUser)));
+    path(":id", () ->
+        get(documented(getSessionDoc, getSession)));
+  });
 }
