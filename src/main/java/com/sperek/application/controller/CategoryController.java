@@ -50,7 +50,8 @@ public class CategoryController {
       .header(CURRENT_USER_HEADER, String.class)
       .jsonArray("200", PomodoroCategoryDTO.class)
       .result("401")
-      .result("403");
+      .result("403")
+      .result("404");
 
   private Handler categoriesCreatedByUser = ctx -> {
     tracker.categoriesCreatedByUser(ownerId(ctx));
@@ -62,7 +63,8 @@ public class CategoryController {
       .queryParam("categoryName", String.class)
       .json("200", PomodoroCategoryDTO.class)
       .result("401")
-      .result("403");
+      .result("403")
+      .result("404");
 
   private Handler getCategory = ctx -> ctx.json(PomodoroCategoryMapper.toDto
       .apply(tracker.getCategory(ownerId(ctx), ctx.pathParam("categoryName"))));
@@ -71,7 +73,10 @@ public class CategoryController {
       .header(CURRENT_USER_HEADER, String.class)
       .queryParam("categoryName", String.class)
       .queryParam("date", String.class)
-      .json("200", Boolean.class);
+      .json("200", Boolean.class)
+      .result("401")
+      .result("403")
+      .result("404");
 
   private Handler dailyGoalFinished = ctx -> {
     final UUID ownerId = ownerId(ctx);
@@ -85,7 +90,10 @@ public class CategoryController {
       .header(CURRENT_USER_HEADER, String.class)
       .queryParam("categoryName", String.class)
       .queryParam("date", String.class)
-      .json("200", Boolean.class);
+      .json("200", Boolean.class)
+      .result("401")
+      .result("403")
+      .result("404");
 
   private Handler weeklyGoalFinished = ctx -> {
     final UUID ownerId = ownerId(ctx);
