@@ -11,7 +11,6 @@ import spock.lang.Specification
 import java.time.LocalDate
 
 import static SessionsDSL.*
-import static SessionsDSL.CATEGORY_BOOK
 
 class PomodoroTrackerSpecification extends Specification {
 

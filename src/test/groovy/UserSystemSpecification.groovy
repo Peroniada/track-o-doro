@@ -57,4 +57,7 @@ class UserSystemSpecification extends Specification {
         then: "User password is changed"
         userSystem.userWithId(userId).password == newPassword
     }
+
+    def "Should set daily goal for user"() {}
+    def "Should set weekly goal for user"() {}
 }

@@ -14,7 +14,7 @@ class SessionCollectionBuilder {
         this
     }
 
-    def withOccurence(ZonedDateTime dateTime) {
+    def withOccurrence(ZonedDateTime dateTime) {
         builder.withOccurrence(dateTime)
         this
     }
