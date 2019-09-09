@@ -3,6 +3,7 @@ package com.sperek.trackodoro.user;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class InMemoryUserRepository implements UserRepository {
@@ -26,5 +27,10 @@ public class InMemoryUserRepository implements UserRepository {
   @Override
   public User getOne(UUID userId) {
     return this.users.get(userId);
+  }
+
+  @Override
+  public Optional<User> findByMail(String userMail) {
+    return users.values().stream().filter(user -> user.getUserMail().equals(userMail)).findFirst();
   }
 }
