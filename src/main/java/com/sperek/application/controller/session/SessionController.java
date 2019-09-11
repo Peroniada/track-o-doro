@@ -8,7 +8,6 @@ import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.document;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
 
 import com.sperek.application.controller.ApiRole;
-import com.sperek.application.controller.TokenValidationFailException;
 import com.sperek.application.controller.query.QueryResolver;
 import com.sperek.application.token.Tokenizer;
 import com.sperek.trackodoro.PomodoroSessionMapper;
@@ -16,13 +15,10 @@ import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 import com.sperek.trackodoro.tracker.PomodoroTracker;
 import com.sperek.trackodoro.tracker.dto.PomodoroSessionDTO;
 import com.sperek.trackodoro.tracker.session.PomodoroSession;
-
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.plugin.openapi.dsl.OpenApiDocumentation;
-
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -113,7 +109,7 @@ public class SessionController {
   private Handler getSession = ctx -> {
     UUID ownerId = ownerId(ctx);
     final PomodoroSession session = tracker.getSession(UUID.fromString(ctx.pathParam("id")));
-    if(ownerId.equals(session.getOwnerId())) {
+    if (ownerId.equals(session.getOwnerId())) {
       ctx.json(PomodoroSessionMapper.toDto.apply(session));
       ctx.status(200);
     } else {
@@ -139,7 +135,7 @@ public class SessionController {
   }
 
   private EndpointGroup sessionRoutes = () -> path("sessions", () -> {
-    get(documented(getSessionsDoc,getSessions), roles(ApiRole.USER));
+    get(documented(getSessionsDoc, getSessions), roles(ApiRole.USER));
     post(documented(saveSessionDoc, saveSession), roles(ApiRole.USER));
     path("count", () ->
         get(documented(countSessionsDoc, countSessions), roles(ApiRole.USER)));
@@ -151,11 +147,8 @@ public class SessionController {
 
   @NotNull
   private UUID ownerId(Context ctx) {
-    try {
-      return UUID
-          .fromString(tokenizer.parser(ctx.header(CURRENT_USER_ID_HEADER_NAME)).getSignature());
-    } catch (SignatureException e) {
-      throw new TokenValidationFailException();
-    }
+    return UUID
+        .fromString(
+            tokenizer.parser(ctx.header(CURRENT_USER_ID_HEADER_NAME)).getBody().getSubject());
   }
 }

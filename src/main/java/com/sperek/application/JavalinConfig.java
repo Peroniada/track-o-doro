@@ -1,8 +1,8 @@
 package com.sperek.application;
 
 import com.sperek.application.controller.ApiRole;
-import com.sperek.application.controller.category.CategoryController;
 import com.sperek.application.controller.GoalController;
+import com.sperek.application.controller.category.CategoryController;
 import com.sperek.application.controller.session.SessionController;
 import com.sperek.application.controller.user.UserController;
 import com.sperek.application.token.Tokenizer;
@@ -14,11 +14,8 @@ import io.javalin.http.Context;
 import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import io.swagger.v3.oas.models.info.Info;
-import java.security.Key;
+import java.security.SignatureException;
 import java.util.Optional;
 
 public class JavalinConfig implements Runnable {
@@ -49,11 +46,11 @@ public class JavalinConfig implements Runnable {
       }
   };
 
-  private Role determineUserRole(Context ctx) {
+  private Role determineUserRole(Context ctx) throws SignatureException {
     String role = "ANYONE";
     String token = Optional.ofNullable(ctx.header("Token")).orElse("");
     if(!token.isEmpty()) {
-      role = tokenizer.parser(token).getBody().getSubject();
+      role = tokenizer.parser(token).getBody().get("role").toString();
     }
     return ApiRole.valueOf(role.toUpperCase());
   }

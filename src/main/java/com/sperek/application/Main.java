@@ -38,9 +38,8 @@ public class Main {
     final InMemoryUserRepository userRepository = new InMemoryUserRepository();
     final PBKDF2PasswordEncryptor passwordEncryptor = new PBKDF2PasswordEncryptor();
     final UserSystem userSystem = new UserSystem(userRepository, passwordEncryptor);
-    final JWTTokenizer tokenGenerator = new JWTTokenizer();
 
-    final UserController userController = new UserController(userSystem, tokenGenerator);
+    final UserController userController = new UserController(userSystem, tokenizer);
 
     final JavalinConfig javalinConfig = new JavalinConfig(sessionController, categoryController, goalController, userController, tokenizer);
     final JsonMapperConfig jsonMapperConfig = new JsonMapperConfig();
