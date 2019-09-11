@@ -14,6 +14,5 @@ public class PomodoroSessionDTO {
   public Integer duration;
   public ZonedDateTime occurrence;
   public UUID id;
-  public UUID ownerId;
 
 }

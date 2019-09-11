@@ -1,5 +1,7 @@
 package com.sperek.trackodoro.user
 
+import com.sperek.trackodoro.user.exceptions.LoginException
+import com.sperek.trackodoro.user.exceptions.UserAlreadyExistsException
 import spock.lang.Specification
 
 class UserSystemSpecification extends Specification {

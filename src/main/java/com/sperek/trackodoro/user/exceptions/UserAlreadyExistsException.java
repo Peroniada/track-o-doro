@@ -1,10 +1,10 @@
-package com.sperek.trackodoro.user;
+package com.sperek.trackodoro.user.exceptions;
 
 public class UserAlreadyExistsException extends RuntimeException {
 
   private final static String message = "User with registered email already exists.";
 
-  UserAlreadyExistsException() {
+  public UserAlreadyExistsException() {
     super(message);
   }
 }

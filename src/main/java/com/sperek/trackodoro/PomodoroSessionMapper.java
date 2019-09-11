@@ -3,6 +3,8 @@ package com.sperek.trackodoro;
 import com.sperek.trackodoro.tracker.session.PomodoroSession;
 import com.sperek.trackodoro.tracker.session.PomodoroSessionBuilder;
 import com.sperek.trackodoro.tracker.dto.PomodoroSessionDTO;
+import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class PomodoroSessionMapper {
@@ -14,17 +16,16 @@ public class PomodoroSessionMapper {
       .duration(pomodoroSession.getDuration())
       .occurrence(pomodoroSession.getOccurrence())
       .id(pomodoroSession.getId())
-      .ownerId(pomodoroSession.sessionsOwner())
       .build());
 
 
-  public static Function<PomodoroSessionDTO, PomodoroSession> fromDto = (pomodoroSessionDTO -> PomodoroSessionBuilder
+  public static BiFunction<PomodoroSessionDTO, UUID, PomodoroSession> fromDto = (pomodoroSessionDTO, ownerId) -> PomodoroSessionBuilder
       .aPomodoroSession()
       .withActivityName(pomodoroSessionDTO.getActivityName())
       .withCategory(pomodoroSessionDTO.getCategory())
       .withDuration(pomodoroSessionDTO.getDuration())
       .withOccurrence(pomodoroSessionDTO.getOccurrence())
       .withId(pomodoroSessionDTO.getId())
-      .withOwnerId(pomodoroSessionDTO.getOwnerId())
-      .build());
+      .withOwnerId(ownerId)
+      .build();
 }

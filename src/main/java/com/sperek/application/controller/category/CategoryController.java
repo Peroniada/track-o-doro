@@ -1,11 +1,14 @@
-package com.sperek.application.controller;
+package com.sperek.application.controller.category;
 
 import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.post;
+import static io.javalin.core.security.SecurityUtil.roles;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.document;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
 
+import com.sperek.application.controller.ApiRole;
+import com.sperek.application.token.Tokenizer;
 import com.sperek.trackodoro.PomodoroCategoryMapper;
 import com.sperek.trackodoro.category.PomodoroCategory;
 import com.sperek.trackodoro.tracker.PomodoroTracker;
@@ -15,21 +18,22 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.plugin.openapi.dsl.OpenApiDocumentation;
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 public class CategoryController {
 
-  private static final String CURRENT_USER_HEADER = "Current-User";
+  private static final String CURRENT_USER_HEADER = "Token";
   private PomodoroTracker tracker;
+  private Tokenizer tokenizer;
 
 
-  public CategoryController(PomodoroTracker tracker) {
+  public CategoryController(PomodoroTracker tracker, Tokenizer tokenizer) {
     this.tracker = tracker;
+    this.tokenizer = tokenizer;
   }
 
-  public EndpointGroup categoryRoutes() {
+  public EndpointGroup apiRoutes() {
     return categoryRoutes;
   }
   private OpenApiDocumentation createCategoryDoc = document()
@@ -105,20 +109,19 @@ public class CategoryController {
 
   @NotNull
   private UUID ownerId(Context ctx) {
-    return UUID.fromString(Optional.ofNullable(ctx.header("Current-User"))
-        .orElseThrow(() -> new RuntimeException("No userId provided")));
+    return UUID.fromString(tokenizer.parser(ctx.header(CURRENT_USER_HEADER)).getSignature());
   }
 
   private EndpointGroup categoryRoutes = () -> path("categories", () -> {
-    get(documented(categoriesByUserDoc, categoriesCreatedByUser));
-    post(documented(createCategoryDoc, createCategory));
+    get(documented(categoriesByUserDoc, categoriesCreatedByUser), roles(ApiRole.USER));
+    post(documented(createCategoryDoc, createCategory), roles(ApiRole.USER));
     path(":categoryName", () -> {
-      get(documented(getCategoryDoc, getCategory));
+      get(documented(getCategoryDoc, getCategory), roles(ApiRole.USER));
       path("goals", () -> {
         path("daily", () ->
-            get(":onDate", documented(dailyGoalFinishedDoc, dailyGoalFinished)));
+            get(":onDate", documented(dailyGoalFinishedDoc, dailyGoalFinished), roles(ApiRole.USER)));
         path("weekly", () ->
-            get(":weekNumber", documented(weeklyGoalFinishedDoc, weeklyGoalFinished)));
+            get(":weekNumber", documented(weeklyGoalFinishedDoc, weeklyGoalFinished), roles(ApiRole.USER)));
       });
     });
   });
