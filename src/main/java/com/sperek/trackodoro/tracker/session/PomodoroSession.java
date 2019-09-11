@@ -45,4 +45,12 @@ public class PomodoroSession {
   public UUID getId() {
     return id;
   }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public UUID getOwnerId() {
+    return ownerId;
+  }
 }

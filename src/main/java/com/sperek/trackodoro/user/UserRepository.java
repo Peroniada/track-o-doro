@@ -12,5 +12,5 @@ public interface UserRepository {
 
   User getOne(UUID userId);
 
-  Optional<User> findByMail(String userMail);
+  User findByMail(String userMail);
 }

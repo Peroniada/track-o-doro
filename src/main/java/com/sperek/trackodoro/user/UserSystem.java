@@ -1,6 +1,10 @@
 package com.sperek.trackodoro.user;
 
+import com.sperek.trackodoro.user.exceptions.LoginException;
+import com.sperek.trackodoro.user.exceptions.PasswordChangeException;
+import com.sperek.trackodoro.user.exceptions.UserAlreadyExistsException;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 public class UserSystem {
@@ -36,17 +40,31 @@ public class UserSystem {
     return userRepository.getOne(userId);
   }
 
-  public void changePassword(UUID userId, String newPassword) {
-    User user = userWithId(userId);
-    final byte[] salt = user.getSalt();
-    userRepository.save(new User(user.getUserMail(), encryptPassword(newPassword, salt), userId, salt));
+  public void changePassword(UUID userId, String oldPassword, String newPassword) {
+    User user = validateNonNull(userWithId(userId));
+    if(passwordsEqual(oldPassword, user)) {
+      final byte[] salt = user.getSalt();
+      final String encryptedPassword = encryptPassword(newPassword, salt);
+      userRepository.save(new User(user.getUserMail(), encryptedPassword, userId, salt));
+    }
+    throw new PasswordChangeException();
   }
 
-  public void login(String userMail, String password) {
-    final User user = userRepository.findByMail(userMail).orElseThrow(LoginException::new);
-    if (!user.getPassword().equals(encryptPassword(password, user.getSalt()))) {
-      throw new LoginException();
+  public User login(String userMail, String password) throws LoginException {
+    final User user = validateNonNull(userRepository.findByMail(userMail));
+    if (passwordsEqual(password, user)) {
+      return user;
     }
+    throw new LoginException();
+  }
+
+  private boolean passwordsEqual(String password, User user) {
+    return user.getPassword().equals(encryptPassword(password, user.getSalt()));
+  }
+
+  private User validateNonNull(User user) {
+    return Optional.ofNullable(user)
+        .orElseThrow(LoginException::new);
   }
 
   private String encryptPassword(String password, byte[] salt) {
