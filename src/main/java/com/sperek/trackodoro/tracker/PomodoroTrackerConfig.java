@@ -1,10 +1,11 @@
 package com.sperek.trackodoro.tracker;
 
 
-import com.sperek.trackodoro.tracker.category.InMemoryPomodoroCategoryRepository;
-import com.sperek.trackodoro.tracker.category.PomodoroCategoryEngineImpl;
-import com.sperek.trackodoro.tracker.session.InMemoryPomodoroSessionRepository;
-import com.sperek.trackodoro.tracker.session.PomodoroSessionEngineImpl;
+import com.sperek.pomodorotracker.domain.tracker.PomodoroTracker;
+import com.sperek.pomodorotracker.domain.tracker.category.InMemoryPomodoroCategoryRepository;
+import com.sperek.pomodorotracker.domain.tracker.category.PomodoroCategoryEngineImpl;
+import com.sperek.pomodorotracker.domain.tracker.session.InMemoryPomodoroSessionRepository;
+import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSessionEngineImpl;
 
 public class PomodoroTrackerConfig  {
 

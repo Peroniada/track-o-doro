@@ -1,11 +1,11 @@
-import com.sperek.trackodoro.category.PomodoroCategory
-import com.sperek.trackodoro.goal.DailyGoal
-import com.sperek.trackodoro.goal.WeeklyGoal
-import com.sperek.trackodoro.sessionFilter.CategorySpecification
-import com.sperek.trackodoro.sessionFilter.DateSpecification
-import com.sperek.trackodoro.tracker.PomodoroTracker
+import com.sperek.pomodorotracker.domain.model.DailyGoal
+import com.sperek.pomodorotracker.domain.model.PomodoroCategory
+import com.sperek.pomodorotracker.domain.model.WeeklyGoal
+import com.sperek.pomodorotracker.domain.sessionFilter.CategorySpecification
+import com.sperek.pomodorotracker.domain.sessionFilter.DateSpecification
+import com.sperek.pomodorotracker.domain.tracker.PomodoroTracker
+import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSession
 import com.sperek.trackodoro.tracker.PomodoroTrackerConfig
-import com.sperek.trackodoro.tracker.session.PomodoroSession
 import spock.lang.Specification
 
 import java.time.LocalDate

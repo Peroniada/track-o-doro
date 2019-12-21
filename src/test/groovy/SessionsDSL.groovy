@@ -1,5 +1,5 @@
-import com.sperek.trackodoro.tracker.session.PomodoroSession
-import com.sperek.trackodoro.tracker.session.PomodoroSessionBuilder
+import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSession
+import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSessionBuilder
 
 import java.time.LocalDate
 import java.time.ZonedDateTime
