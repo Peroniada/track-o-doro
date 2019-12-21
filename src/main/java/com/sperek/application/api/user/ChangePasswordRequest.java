@@ -1,4 +1,4 @@
-package com.sperek.application.controller.user;
+package com.sperek.application.api.user;
 
 import lombok.Data;
 

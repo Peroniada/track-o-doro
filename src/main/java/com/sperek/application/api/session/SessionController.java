@@ -1,4 +1,4 @@
-package com.sperek.application.controller.session;
+package com.sperek.application.api.session;
 
 import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.path;
@@ -7,9 +7,9 @@ import static io.javalin.core.security.SecurityUtil.roles;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.document;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
 
-import com.sperek.application.controller.ApiRole;
-import com.sperek.application.controller.query.QueryResolver;
-import com.sperek.application.token.Tokenizer;
+import com.sperek.application.api.ApiRole;
+import com.sperek.application.api.query.QueryResolver;
+import com.sperek.application.security.JWTTokenizer;
 import com.sperek.trackodoro.PomodoroSessionMapper;
 import com.sperek.trackodoro.sessionFilter.composite.spec.Specification;
 import com.sperek.trackodoro.tracker.PomodoroTracker;
@@ -33,10 +33,10 @@ public class SessionController {
 
   private PomodoroTracker tracker;
   private QueryResolver queryResolver;
-  private Tokenizer tokenizer;
+  private JWTTokenizer tokenizer;
   private Logger log = LoggerFactory.getLogger(SessionController.class);
 
-  public SessionController(PomodoroTracker tracker, Tokenizer tokenizer) {
+  public SessionController(PomodoroTracker tracker, JWTTokenizer tokenizer) {
     this.tracker = tracker;
     this.tokenizer = tokenizer;
     this.queryResolver = new QueryResolver();

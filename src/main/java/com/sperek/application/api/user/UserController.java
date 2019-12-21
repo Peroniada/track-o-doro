@@ -1,4 +1,4 @@
-package com.sperek.application.controller.user;
+package com.sperek.application.api.user;
 
 import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.post;
@@ -7,8 +7,8 @@ import static io.javalin.core.security.SecurityUtil.roles;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.document;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
 
-import com.sperek.application.controller.ApiRole;
-import com.sperek.application.token.Tokenizer;
+import com.sperek.application.api.ApiRole;
+import com.sperek.application.security.JWTTokenizer;
 import com.sperek.trackodoro.tracker.dto.UserDTO;
 import com.sperek.trackodoro.user.PasswordEncryptor;
 import com.sperek.trackodoro.user.User;
@@ -23,10 +23,10 @@ import org.slf4j.LoggerFactory;
 public class UserController {
 
   private UserSystem userSystem;
-  private Tokenizer tokenizer;
+  private JWTTokenizer tokenizer;
   private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-  public UserController(UserSystem userSystem, Tokenizer tokenizer) {
+  public UserController(UserSystem userSystem, JWTTokenizer tokenizer) {
     this.userSystem = userSystem;
     this.tokenizer = tokenizer;
   }

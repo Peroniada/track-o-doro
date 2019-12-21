@@ -1,4 +1,4 @@
-package com.sperek.application.controller.query;
+package com.sperek.application.api.query;
 
 import com.sperek.trackodoro.sessionFilter.CategorySpecification;
 import com.sperek.trackodoro.sessionFilter.DateSpecification;

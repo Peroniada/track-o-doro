@@ -1,11 +1,11 @@
 package com.sperek.application;
 
-import com.sperek.application.controller.ApiRole;
-import com.sperek.application.controller.GoalController;
-import com.sperek.application.controller.category.CategoryController;
-import com.sperek.application.controller.session.SessionController;
-import com.sperek.application.controller.user.UserController;
-import com.sperek.application.token.Tokenizer;
+import com.sperek.application.api.ApiRole;
+import com.sperek.application.api.GoalController;
+import com.sperek.application.api.category.CategoryController;
+import com.sperek.application.api.session.SessionController;
+import com.sperek.application.api.user.UserController;
+import com.sperek.application.security.JWTTokenizer;
 import io.javalin.Javalin;
 import io.javalin.core.security.AccessManager;
 import io.javalin.core.security.Role;
@@ -24,12 +24,12 @@ public class JavalinConfig implements Runnable {
   private CategoryController categoryController;
   private GoalController goalController;
   private UserController userController;
-  private Tokenizer tokenizer;
+  private JWTTokenizer tokenizer;
 
   public JavalinConfig(SessionController sessionController,
       CategoryController categoryController,
       GoalController goalController,
-      UserController userController, Tokenizer tokenizer) {
+      UserController userController, JWTTokenizer tokenizer) {
     this.sessionController = sessionController;
     this.categoryController = categoryController;
     this.goalController = goalController;

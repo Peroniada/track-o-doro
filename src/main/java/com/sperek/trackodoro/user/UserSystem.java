@@ -42,7 +42,7 @@ public class UserSystem {
 
   public void changePassword(UUID userId, String oldPassword, String newPassword) {
     User user = validateNonNull(userWithId(userId));
-    if(passwordsEqual(oldPassword, user)) {
+    if(passwordMatchesUser(oldPassword, user)) {
       final byte[] salt = user.getSalt();
       final String encryptedPassword = encryptPassword(newPassword, salt);
       userRepository.save(new User(user.getUserMail(), encryptedPassword, userId, salt));
@@ -52,13 +52,13 @@ public class UserSystem {
 
   public User login(String userMail, String password) throws LoginException {
     final User user = validateNonNull(userRepository.findByMail(userMail));
-    if (passwordsEqual(password, user)) {
+    if (passwordMatchesUser(password, user)) {
       return user;
     }
     throw new LoginException();
   }
 
-  private boolean passwordsEqual(String password, User user) {
+  private boolean passwordMatchesUser(String password, User user) {
     return user.getPassword().equals(encryptPassword(password, user.getSalt()));
   }
 

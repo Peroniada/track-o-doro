@@ -1,4 +1,4 @@
-package com.sperek.application.controller.category;
+package com.sperek.application.api.category;
 
 import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.path;
@@ -7,8 +7,8 @@ import static io.javalin.core.security.SecurityUtil.roles;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.document;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
 
-import com.sperek.application.controller.ApiRole;
-import com.sperek.application.token.Tokenizer;
+import com.sperek.application.api.ApiRole;
+import com.sperek.application.security.JWTTokenizer;
 import com.sperek.trackodoro.PomodoroCategoryMapper;
 import com.sperek.trackodoro.category.PomodoroCategory;
 import com.sperek.trackodoro.tracker.PomodoroTracker;
@@ -25,10 +25,10 @@ public class CategoryController {
 
   private static final String CURRENT_USER_HEADER = "Token";
   private PomodoroTracker tracker;
-  private Tokenizer tokenizer;
+  private JWTTokenizer tokenizer;
 
 
-  public CategoryController(PomodoroTracker tracker, Tokenizer tokenizer) {
+  public CategoryController(PomodoroTracker tracker, JWTTokenizer tokenizer) {
     this.tracker = tracker;
     this.tokenizer = tokenizer;
   }

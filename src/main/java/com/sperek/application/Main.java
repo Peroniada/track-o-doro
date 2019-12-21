@@ -1,11 +1,10 @@
 package com.sperek.application;
 
-import com.sperek.application.controller.category.CategoryController;
-import com.sperek.application.controller.GoalController;
-import com.sperek.application.controller.session.SessionController;
-import com.sperek.application.controller.user.UserController;
-import com.sperek.application.token.JWTTokenizer;
-import com.sperek.application.token.Tokenizer;
+import com.sperek.application.api.category.CategoryController;
+import com.sperek.application.api.GoalController;
+import com.sperek.application.api.session.SessionController;
+import com.sperek.application.api.user.UserController;
+import com.sperek.application.security.JWTTokenizer;
 import com.sperek.trackodoro.tracker.PomodoroTracker;
 import com.sperek.trackodoro.tracker.category.InMemoryPomodoroCategoryRepository;
 import com.sperek.trackodoro.tracker.category.PomodoroCategoryEngine;
@@ -30,7 +29,7 @@ public class Main {
     final PomodoroCategoryEngine categoryEngine = new PomodoroCategoryEngineImpl(categoryRepository);
 
     final PomodoroTracker tracker = new PomodoroTracker(sessionEngine, categoryEngine);
-    final Tokenizer tokenizer = new JWTTokenizer();
+    final JWTTokenizer tokenizer = new JWTTokenizer();
     final SessionController sessionController = new SessionController(tracker, tokenizer);
     final CategoryController categoryController = new CategoryController(tracker, tokenizer);
     final GoalController goalController = new GoalController(tracker);

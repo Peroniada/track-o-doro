@@ -1,4 +1,4 @@
-package com.sperek.application.controller;
+package com.sperek.application.api;
 
 import io.javalin.core.security.Role;
 

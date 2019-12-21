@@ -1,4 +1,4 @@
-package com.sperek.application.controller;
+package com.sperek.application.api;
 
 import com.sperek.trackodoro.goal.DailyGoal;
 import com.sperek.trackodoro.goal.WeeklyGoal;

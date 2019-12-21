@@ -1,4 +1,4 @@
-package com.sperek.application.token;
+package com.sperek.application.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -10,11 +10,10 @@ import java.security.Key;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-public class JWTTokenizer implements Tokenizer {
+public class JWTTokenizer {
 
   private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-  @Override
   public String generate(String userId, String role) {
     final Date tokenExpirationDate = Date.from(ZonedDateTime.now().plusMinutes(10L).toInstant());
     String jws = Jwts.builder()
@@ -29,7 +28,6 @@ public class JWTTokenizer implements Tokenizer {
     return jws;
   }
 
-  @Override
   public Jws<Claims> parser(String token) throws SignatureException {
     return Jwts.parser().setSigningKey(key).parseClaimsJws(token);
   }
