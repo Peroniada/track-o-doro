@@ -5,7 +5,7 @@ import com.sperek.pomodorotracker.domain.sessionFilter.CategorySpecification
 import com.sperek.pomodorotracker.domain.sessionFilter.DateSpecification
 import com.sperek.pomodorotracker.domain.tracker.PomodoroTracker
 import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSession
-import com.sperek.trackodoro.tracker.PomodoroTrackerConfig
+import com.sperek.pomodorotracker.PomodoroTrackerConfig
 import spock.lang.Specification
 
 import java.time.LocalDate

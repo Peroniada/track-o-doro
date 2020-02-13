@@ -47,8 +47,9 @@ public class UserSystem {
       final byte[] salt = user.getSalt();
       final String encryptedPassword = encryptPassword(newPassword, salt);
       userRepository.save(new User(user.getUserMail(), encryptedPassword, userId, salt));
+    } else {
+      throw new PasswordChangeException();
     }
-    throw new PasswordChangeException();
   }
 
   public User login(String userMail, String password) throws LoginException {

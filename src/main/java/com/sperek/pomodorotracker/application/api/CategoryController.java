@@ -7,7 +7,6 @@ import static io.javalin.core.security.SecurityUtil.roles;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.document;
 import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
 
-import com.sperek.pomodorotracker.application.api.ApiRole;
 import com.sperek.pomodorotracker.application.security.JWTTokenizer;
 import com.sperek.pomodorotracker.domain.PomodoroCategoryMapper;
 import com.sperek.pomodorotracker.domain.model.PomodoroCategory;

@@ -1,4 +1,4 @@
-package com.sperek.trackodoro.tracker;
+package com.sperek.pomodorotracker;
 
 
 import com.sperek.pomodorotracker.domain.tracker.PomodoroTracker;

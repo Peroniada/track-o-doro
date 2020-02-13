@@ -26,6 +26,31 @@ flyway {
     user = 'sa'
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.sperek.pomodorotracker.application.Main',
+        )
+    }
+}
+
+task fatJar(type: Jar) {
+    manifest.from jar.manifest
+    classifier = 'all'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
+}
+
+artifacts {
+    archives fatJar
+}
+
 dependencies {
     compile group: 'org.jooq', name: 'jooq', version: '3.12.3'
     compile group: 'org.jooq', name: 'jooq-codegen', version: '3.12.3'

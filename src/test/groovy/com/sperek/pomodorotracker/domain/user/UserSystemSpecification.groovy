@@ -55,7 +55,7 @@ class UserSystemSpecification extends Specification {
 
         when: "User request for password change"
         def newPassword = "newPassword"
-        userSystem.changePassword(userId, newPassword)
+        userSystem.changePassword(userId, oldPassword, newPassword)
 
         then: "User password is changed"
         def retrievedUser = userSystem.userWithId(userId)
