@@ -4,6 +4,7 @@ import com.sperek.pomodorotracker.application.api.CategoryController;
 import com.sperek.pomodorotracker.application.api.GoalController;
 import com.sperek.pomodorotracker.application.api.SessionController;
 import com.sperek.pomodorotracker.application.api.UserController;
+import com.sperek.pomodorotracker.application.ports.secondary.UserRepository;
 import com.sperek.pomodorotracker.application.security.JWTTokenizer;
 import com.sperek.pomodorotracker.application.serialization.JsonMapperConfig;
 import com.sperek.pomodorotracker.domain.tracker.PomodoroTracker;
@@ -15,9 +16,10 @@ import com.sperek.pomodorotracker.domain.tracker.session.InMemoryPomodoroSession
 import com.sperek.pomodorotracker.application.ports.PomodoroSessionEngine;
 import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSessionEngineImpl;
 import com.sperek.pomodorotracker.application.ports.secondary.PomodoroSessionRepository;
-import com.sperek.pomodorotracker.domain.user.InMemoryUserRepository;
+import com.sperek.pomodorotracker.infrastructure.persistence.InMemoryUserRepository;
 import com.sperek.pomodorotracker.domain.user.PBKDF2PasswordEncryptor;
 import com.sperek.pomodorotracker.domain.user.UserSystem;
+import com.sperek.pomodorotracker.infrastructure.persistence.JooqUserRepository;
 import java.util.UUID;
 
 public class Main {
@@ -25,6 +27,8 @@ public class Main {
   public static void main(String[] args) {
     final PomodoroSessionRepository sessionRepository = new InMemoryPomodoroSessionRepository();
     final PomodoroSessionEngine<UUID> sessionEngine = new PomodoroSessionEngineImpl(sessionRepository);
+
+    final JooqConfig jooqConfig = new JooqConfig("jdbc:postgresql://localhost:5432/pomodoro-tracker", "postgres", "root");
 
     final PomodoroCategoryRepository categoryRepository = new InMemoryPomodoroCategoryRepository();
     final PomodoroCategoryEngine categoryEngine = new PomodoroCategoryEngineImpl(categoryRepository);
@@ -35,7 +39,7 @@ public class Main {
     final CategoryController categoryController = new CategoryController(tracker, tokenizer);
     final GoalController goalController = new GoalController(tracker);
 
-    final InMemoryUserRepository userRepository = new InMemoryUserRepository();
+    final UserRepository userRepository = new JooqUserRepository(jooqConfig);
     final PBKDF2PasswordEncryptor passwordEncryptor = new PBKDF2PasswordEncryptor();
     final UserSystem userSystem = new UserSystem(userRepository, passwordEncryptor);
 

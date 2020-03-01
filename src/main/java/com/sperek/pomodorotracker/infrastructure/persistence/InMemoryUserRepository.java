@@ -1,6 +1,7 @@
-package com.sperek.pomodorotracker.domain.user;
+package com.sperek.pomodorotracker.infrastructure.persistence;
 
 import com.sperek.pomodorotracker.application.ports.secondary.UserRepository;
+import com.sperek.pomodorotracker.domain.user.User;
 import com.sperek.pomodorotracker.domain.user.exceptions.LoginException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class InMemoryUserRepository implements UserRepository {
 
   @Override
   public void save(User newUser) {
-    this.users.put(newUser.getUserId(), newUser);
+    this.users.put(newUser.getId(), newUser);
   }
 
   @Override
@@ -32,7 +33,7 @@ public class InMemoryUserRepository implements UserRepository {
 
   @Override
   public User findByMail(String userMail) {
-    return users.values().stream().filter(user -> user.getUserMail().equals(userMail)).findFirst()
+    return users.values().stream().filter(user -> user.getEmail().equals(userMail)).findFirst()
         .orElseThrow(
             LoginException::new);
   }

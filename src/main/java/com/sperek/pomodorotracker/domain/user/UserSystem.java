@@ -1,9 +1,10 @@
 package com.sperek.pomodorotracker.domain.user;
 
 import com.sperek.pomodorotracker.application.ports.secondary.UserRepository;
-import com.sperek.pomodorotracker.domain.user.exceptions.UserAlreadyExistsException;
+import com.sperek.pomodorotracker.domain.tracker.dto.UserDTO;
 import com.sperek.pomodorotracker.domain.user.exceptions.LoginException;
 import com.sperek.pomodorotracker.domain.user.exceptions.PasswordChangeException;
+import com.sperek.pomodorotracker.domain.user.exceptions.UserAlreadyExistsException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,18 +20,20 @@ public class UserSystem {
     this.passwordEncryptor = passwordEncryptor;
   }
 
-  public void createAccount(User newUser) {
+  public void createAccount(UserDTO newUser) {
+
     if (userExists(newUser)) {
       throw new UserAlreadyExistsException();
     }
     final byte[] salt = PasswordEncryptor.generateSalt();
     final String encryptedPassword = encryptPassword(newUser.getPassword(), salt);
     userRepository
-        .save(new User(newUser.getUserMail(), encryptedPassword, newUser.getUserId(), salt));
+        .save(new User(newUser.getUserMail(), encryptedPassword, UUID.randomUUID(),
+            salt, UUID.randomUUID()));
   }
 
-  private boolean userExists(User newUser) {
-    return users().stream().anyMatch(user -> user.getUserMail().equals(newUser.getUserMail()));
+  private boolean userExists(UserDTO newUser) {
+    return users().stream().anyMatch(user -> user.getEmail().equals(newUser.getUserMail()));
   }
 
   public Collection<User> users() {
@@ -43,10 +46,11 @@ public class UserSystem {
 
   public void changePassword(UUID userId, String oldPassword, String newPassword) {
     User user = validateNonNull(userWithId(userId));
-    if(passwordMatchesUser(oldPassword, user)) {
+    if (passwordMatchesUser(oldPassword, user)) {
       final byte[] salt = user.getSalt();
       final String encryptedPassword = encryptPassword(newPassword, salt);
-      userRepository.save(new User(user.getUserMail(), encryptedPassword, userId, salt));
+      userRepository.save(new User(user.getEmail(), encryptedPassword, userId, salt,
+          user.getUserGoals().getUserGoalsId()));
     } else {
       throw new PasswordChangeException();
     }

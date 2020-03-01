@@ -5,40 +5,40 @@ import com.sperek.pomodorotracker.domain.model.WeeklyGoal;
 import java.util.UUID;
 
 public class User {
-    private UUID userId;
-    private String userMail;
+    private UUID id;
+    private String email;
     private String password;
     private byte[] salt;
-    private UserRole role;
+    private UserRole userRole;
     private UserGoals userGoals;
 
-    public User(String userMail, String password, UUID userId, byte[] salt) {
-        this.userMail = userMail;
+    public User(String email, String password, UUID id, byte[] salt, UUID userGoalsId) {
+        this.email = email;
         this.password = password;
-        this.userId = userId;
+        this.id = id;
         this.salt = salt;
-        this.role = UserRole.USER;
-        this.userGoals = new UserGoals(new DailyGoal(1), new WeeklyGoal(1));
+        this.userRole = UserRole.USER;
+        this.userGoals = new UserGoals(new DailyGoal(1), new WeeklyGoal(1), userGoalsId);
     }
 
-    public String getUserMail() {
-        return userMail;
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public UUID getUserId() {
-        return userId;
+    public UUID getId() {
+        return id;
     }
 
     public byte[] getSalt() {
         return salt;
     }
 
-    public UserRole getRole() {
-        return role;
+    public UserRole getUserRole() {
+        return userRole;
     }
 
     public UserGoals getUserGoals() {

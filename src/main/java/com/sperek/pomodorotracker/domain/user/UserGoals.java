@@ -2,14 +2,17 @@ package com.sperek.pomodorotracker.domain.user;
 
 import com.sperek.pomodorotracker.domain.model.DailyGoal;
 import com.sperek.pomodorotracker.domain.model.WeeklyGoal;
+import java.util.UUID;
 
 public class UserGoals {
+  private UUID userGoalsId;
   private DailyGoal dailyGoal;
   private WeeklyGoal weeklyGoal;
 
-  public UserGoals(DailyGoal dailyGoal, WeeklyGoal weeklyGoal) {
+  public UserGoals(DailyGoal dailyGoal, WeeklyGoal weeklyGoal, UUID userGoalsId) {
     this.dailyGoal = dailyGoal;
     this.weeklyGoal = weeklyGoal;
+    this.userGoalsId = userGoalsId;
   }
 
   public DailyGoal getDailyGoal() {
@@ -26,5 +29,9 @@ public class UserGoals {
 
   public void setWeeklyGoal(WeeklyGoal weeklyGoal) {
     this.weeklyGoal = weeklyGoal;
+  }
+
+  public UUID getUserGoalsId() {
+    return userGoalsId;
   }
 }

@@ -2,6 +2,7 @@ package com.sperek.pomodorotracker.domain.user
 
 import com.sperek.pomodorotracker.domain.user.exceptions.LoginException
 import com.sperek.pomodorotracker.domain.user.exceptions.UserAlreadyExistsException
+import com.sperek.pomodorotracker.infrastructure.persistence.InMemoryUserRepository
 import spock.lang.Specification
 
 class UserSystemSpecification extends Specification {
@@ -23,11 +24,11 @@ class UserSystemSpecification extends Specification {
         def userId = UUID.randomUUID()
 
         when: "User request for creating and account"
-        userSystem.createAccount(new User(userEmail, password, userId))
+        userSystem.createAccount(new User(userEmail, password, userId, [] as byte[], userGoalsId))
 
         then: "User is created"
         userSystem.users().size() > 0
-        userSystem.userWithId(userId).getUserMail() == userEmail
+        userSystem.userWithId(userId).getEmail() == userEmail
     }
 
     def "Should not be able to create a user with the same mail"() {
@@ -36,8 +37,8 @@ class UserSystemSpecification extends Specification {
         def password = "password"
 
         when: "User tries to create two accounts with the same mail"
-        userSystem.createAccount(new User(userMail, password, UUID.randomUUID()))
-        userSystem.createAccount(new User(userMail, password, UUID.randomUUID()))
+        userSystem.createAccount(new User(userMail, password, UUID.randomUUID(), [] as byte[], userGoalsId))
+        userSystem.createAccount(new User(userMail, password, UUID.randomUUID(), [] as byte[], userGoalsId))
 
         then: "One account remains, Exception is thrown"
         userSystem.users().size() == 1
@@ -50,7 +51,7 @@ class UserSystemSpecification extends Specification {
         def userMail = "mail@mail.com"
         def oldPassword = "password"
         def userId = UUID.randomUUID()
-        def user = new User(userMail, oldPassword, userId, PasswordEncryptor.generateSalt())
+        def user = new User(userMail, oldPassword, userId, PasswordEncryptor.generateSalt(), userGoalsId)
         userSystem.createAccount(user)
 
         when: "User request for password change"
@@ -67,7 +68,7 @@ class UserSystemSpecification extends Specification {
         def mail = "mail@mail.com"
         def password = "password"
         def uuid = UUID.randomUUID()
-        def user = new User(mail, password, uuid)
+        def user = new User(mail, password, uuid, [] as byte[], userGoalsId)
         userSystem.createAccount(user)
 
         when: "User tries to login"
@@ -90,7 +91,7 @@ class UserSystemSpecification extends Specification {
         def mail = "mail@mail.com"
         def password = "password"
         def uuid = UUID.randomUUID()
-        def user = new User(mail, password, uuid, PasswordEncryptor.generateSalt())
+        def user = new User(mail, password, uuid, PasswordEncryptor.generateSalt(), userGoalsId)
         userSystem.createAccount(user)
 
         when: "A user tries to log in with wrong password"

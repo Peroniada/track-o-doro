@@ -43,8 +43,7 @@ public class UserController {
   private Handler createAccount = ctx -> {
     UserDTO newUser = ctx.bodyAsClass(UserDTO.class);
     userSystem
-        .createAccount(new User(newUser.getUserMail(), newUser.getPassword(), UUID.randomUUID(),
-            PasswordEncryptor.generateSalt()));
+        .createAccount(newUser);
     ctx.status(201);
   };
 
@@ -57,7 +56,7 @@ public class UserController {
     UserDTO userDTO = ctx.bodyAsClass(UserDTO.class);
     User user = userSystem.login(userDTO.getUserMail(), userDTO.getPassword());
     final String token = tokenizer
-        .generate(user.getUserId().toString(), user.getRole().toString());
+        .generate(user.getId().toString(), user.getUserRole().toString());
     ctx.header("token", token);
     ctx.status(200);
   };
