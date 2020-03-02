@@ -17,7 +17,7 @@ repositories {
 }
 
 flyway {
-    url = 'jdbc:postgresql://localhost:5432/pomodoro-tracker'
+    url = 'jdbc:postgresql://pg_pomodoro:5432/pomodoro-tracker'
     user = 'postgres'
     password = 'root'
 }
@@ -79,7 +79,7 @@ jooq {
     sample(sourceSets.main) {
         jdbc {
             driver = 'org.postgresql.Driver'
-            url = 'jdbc:postgresql://localhost:5432/pomodoro-tracker'
+            url = 'jdbc:postgresql://pg_pomodoro:5432/pomodoro-tracker'
             user = 'postgres'
             password = 'root'
             properties {
