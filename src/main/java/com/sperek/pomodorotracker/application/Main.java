@@ -28,7 +28,7 @@ public class Main {
     final PomodoroSessionRepository sessionRepository = new InMemoryPomodoroSessionRepository();
     final PomodoroSessionEngine<UUID> sessionEngine = new PomodoroSessionEngineImpl(sessionRepository);
 
-    final JooqConfig jooqConfig = new JooqConfig("jdbc:postgresql://pg_pomodoro:5432/pomodoro-tracker", "postgres", "root");
+    final JooqConfig jooqConfig = new JooqConfig("jdbc:postgresql://172.19.0.1:5432/pomodoro-tracker", "postgres", "root");
 
     final PomodoroCategoryRepository categoryRepository = new InMemoryPomodoroCategoryRepository();
     final PomodoroCategoryEngine categoryEngine = new PomodoroCategoryEngineImpl(categoryRepository);
