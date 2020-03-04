@@ -7,6 +7,8 @@ import com.sperek.pomodorotracker.application.JooqConfig;
 import com.sperek.pomodorotracker.application.ports.secondary.UserRepository;
 import com.sperek.pomodorotracker.domain.user.User;
 import com.sperek.pomodorotracker.domain.user.UserRole;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -25,13 +27,20 @@ public class JooqUserRepository implements UserRepository {
   public void save(User newUser) {
     final UserRole userRole = newUser.getUserRole();
     Role role = Role.valueOf(userRole.name());
-    final DSLContext dsl = dsl();
-    dsl.insertInto(USER_ACCOUNT)
-        .columns(USER_ACCOUNT.PK_USER_ID, USER_ACCOUNT.EMAIL, USER_ACCOUNT.PASSWORD,
-            USER_ACCOUNT.ROLE, USER_ACCOUNT.SALT, USER_ACCOUNT.FK_USER_GOALS_ID)
-        .values(newUser.getId(), newUser.getEmail(), newUser.getPassword(), role, newUser.getSalt(),
-            newUser.getUserGoals().getUserGoalsId()).execute();
+
+    try (Connection conn = jooqConfig.connection()) {
+      DSLContext dsl = jooqConfig.dsl(conn);
+      dsl.insertInto(USER_ACCOUNT)
+          .columns(USER_ACCOUNT.PK_USER_ID, USER_ACCOUNT.EMAIL, USER_ACCOUNT.PASSWORD,
+              USER_ACCOUNT.ROLE, USER_ACCOUNT.SALT, USER_ACCOUNT.FK_USER_GOALS_ID)
+          .values(newUser.getId(), newUser.getEmail(), newUser.getPassword(), role, newUser.getSalt(),
+              newUser.getUserGoals().getUserGoalsId()).execute();
+    }
+    catch (SQLException e) {
+      throw new RuntimeException(e.getMessage());
+    }
   }
+
 
   @Override
   public Collection<User> findAll() {
@@ -39,7 +48,11 @@ public class JooqUserRepository implements UserRepository {
   }
 
   private SelectJoinStep<Record> selectFromUserAccount() {
-    return dsl().select().from(USER_ACCOUNT);
+    try (Connection conn = jooqConfig.connection()) {
+      return jooqConfig.dsl(conn).select().from(USER_ACCOUNT);
+    } catch (SQLException e) {
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   @Override
@@ -52,7 +65,4 @@ public class JooqUserRepository implements UserRepository {
     return null;
   }
 
-  private DSLContext dsl() {
-    return this.jooqConfig.dsl();
-  }
 }

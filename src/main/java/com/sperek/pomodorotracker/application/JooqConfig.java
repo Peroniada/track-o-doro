@@ -19,16 +19,11 @@ public class JooqConfig {
     this.url = url;
   }
 
-  public DSLContext dsl() {
-//    userName = "postgres";
-//    password = "root";
-//    url = "jdbc:postgresql://localhost:5432/pomodoro-tracker";
+  public DSLContext dsl(Connection conn) {
+    return DSL.using(conn, SQLDialect.POSTGRES);
+  }
 
-    try (Connection conn = DriverManager.getConnection(url, userName, password)) {
-      return DSL.using(conn, SQLDialect.POSTGRES);
-    }
-    catch (SQLException e) {
-      throw new RuntimeException(e.getCause());
-    }
+  public Connection connection() throws SQLException {
+    return DriverManager.getConnection(url, userName, password);
   }
 }
