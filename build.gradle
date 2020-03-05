@@ -7,6 +7,8 @@ plugins {
     id 'nu.studer.jooq' version '4.1'
 }
 
+def db_url = System.getenv('DB_URL') ?: "localhost:5432/pomodoro-tracker"
+
 group 'com.sperek'
 version '1.0-SNAPSHOT'
 
@@ -17,7 +19,7 @@ repositories {
 }
 
 flyway {
-    url = 'jdbc:postgresql://db:5432/pomodoro-tracker'
+    url = "jdbc:postgresql://${db_url}"
     user = 'postgres'
     password = 'root'
 }
@@ -60,6 +62,7 @@ dependencies {
     compile group: 'cc.vileda', name: 'kotlin-openapi3-dsl', version: '0.20.1'
     compile group: 'org.webjars', name: 'swagger-ui', version: '3.22.2'
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.10.2'
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.10'
     compile 'io.jsonwebtoken:jjwt-api:0.10.7'
     runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
@@ -79,7 +82,8 @@ jooq {
     sample(sourceSets.main) {
         jdbc {
             driver = 'org.postgresql.Driver'
-            url = 'jdbc:postgresql://db:5432/pomodoro-tracker'
+//            url = 'jdbc:postgresql://db:5432/pomodoro-tracker'
+            url = "jdbc:postgresql://${db_url}"
             user = 'postgres'
             password = 'root'
             properties {

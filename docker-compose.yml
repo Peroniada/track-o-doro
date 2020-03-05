@@ -3,6 +3,8 @@ services:
 
   pomodoro_tracker:
     container_name: pomodoro_tracker
+    environment:
+      DB_URL: db:5432/pomodoro-tracker
     build: .
     depends_on:
       - db
