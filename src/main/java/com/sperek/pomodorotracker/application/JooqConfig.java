@@ -11,19 +11,16 @@ public class JooqConfig {
 
   private String userName;
   private String password;
-  private String url;
-
-  public JooqConfig(String url, String userName, String password) {
-    this.userName = userName;
-    this.password = password;
-    this.url = url;
-  }
+  private String host;
 
   public DSLContext dsl(Connection conn) {
     return DSL.using(conn, SQLDialect.POSTGRES);
   }
 
   public Connection connection() throws SQLException {
-    return DriverManager.getConnection(url, userName, password);
+    return DriverManager.getConnection(host, userName, password);
+  }
+
+  public JooqConfig() {
   }
 }

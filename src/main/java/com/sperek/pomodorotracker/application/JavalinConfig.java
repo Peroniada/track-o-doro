@@ -15,7 +15,6 @@ import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.swagger.v3.oas.models.info.Info;
-import java.security.SignatureException;
 import java.util.Optional;
 
 public class JavalinConfig implements Runnable {
@@ -46,7 +45,7 @@ public class JavalinConfig implements Runnable {
       }
   };
 
-  private Role determineUserRole(Context ctx) throws SignatureException {
+  private Role determineUserRole(Context ctx) {
     String role = "ANYONE";
     String token = Optional.ofNullable(ctx.header("Token")).orElse("");
     if(!token.isEmpty()) {

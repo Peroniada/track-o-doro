@@ -1,0 +1,4 @@
+database:
+  userName: ${DB_USER:-postgres}
+  password: ${POSTGRES_PASSWORD:-root}
+  host: ${DB_URL:-localhost}
