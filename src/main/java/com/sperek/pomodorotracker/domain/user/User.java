@@ -1,7 +1,6 @@
 package com.sperek.pomodorotracker.domain.user;
 
-import com.sperek.pomodorotracker.domain.model.DailyGoal;
-import com.sperek.pomodorotracker.domain.model.WeeklyGoal;
+import com.sperek.infrastructure.enums.Role;
 import java.util.UUID;
 
 public class User {
@@ -10,15 +9,26 @@ public class User {
     private String password;
     private byte[] salt;
     private UserRole userRole;
-    private UserGoals userGoals;
+    private UUID userGoals;
 
-    public User(String email, String password, UUID id, byte[] salt, UUID userGoalsId) {
+    public User(UUID id, String email, String password, byte[] salt, UUID userGoalsId) {
         this.email = email;
         this.password = password;
         this.id = id;
         this.salt = salt;
         this.userRole = UserRole.USER;
-        this.userGoals = new UserGoals(new DailyGoal(1), new WeeklyGoal(1), userGoalsId);
+        this.userGoals = userGoalsId;
+    }
+
+    public User(UUID id, String email, String password, byte[] salt,
+        Role userRole, UUID fkUserGoalsId) {
+        String role = userRole.getLiteral();
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.salt = salt;
+        this.userRole = UserRole.valueOf(role);
+        this.userGoals = fkUserGoalsId;
     }
 
     public String getEmail() {
@@ -41,7 +51,7 @@ public class User {
         return userRole;
     }
 
-    public UserGoals getUserGoals() {
+    public UUID getUserGoals() {
         return userGoals;
     }
 }

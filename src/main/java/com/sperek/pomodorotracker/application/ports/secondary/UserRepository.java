@@ -2,6 +2,7 @@ package com.sperek.pomodorotracker.application.ports.secondary;
 
 import com.sperek.pomodorotracker.domain.user.User;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository {
@@ -10,7 +11,7 @@ public interface UserRepository {
 
   Collection<User> findAll();
 
-  User getOne(UUID userId);
+  Optional<User> getOne(UUID userId);
 
-  User findByMail(String userMail);
+  Optional<User> findByMail(String userMail);
 }

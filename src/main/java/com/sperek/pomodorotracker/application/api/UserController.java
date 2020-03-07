@@ -9,9 +9,8 @@ import static io.javalin.plugin.openapi.dsl.OpenApiBuilder.documented;
 import com.sperek.pomodorotracker.application.api.requests.ChangePasswordRequest;
 import com.sperek.pomodorotracker.application.security.JWTTokenizer;
 import com.sperek.pomodorotracker.domain.tracker.dto.UserDTO;
-import com.sperek.pomodorotracker.domain.user.PasswordEncryptor;
 import com.sperek.pomodorotracker.domain.user.User;
-import com.sperek.pomodorotracker.domain.user.UserSystem;
+import com.sperek.pomodorotracker.domain.user.UserService;
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.core.security.SecurityUtil;
 import io.javalin.http.Handler;
@@ -22,12 +21,12 @@ import org.slf4j.LoggerFactory;
 
 public class UserController {
 
-  private UserSystem userSystem;
+  private UserService userService;
   private JWTTokenizer tokenizer;
   private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-  public UserController(UserSystem userSystem, JWTTokenizer tokenizer) {
-    this.userSystem = userSystem;
+  public UserController(UserService userService, JWTTokenizer tokenizer) {
+    this.userService = userService;
     this.tokenizer = tokenizer;
   }
 
@@ -42,7 +41,7 @@ public class UserController {
 
   private Handler createAccount = ctx -> {
     UserDTO newUser = ctx.bodyAsClass(UserDTO.class);
-    userSystem
+    userService
         .createAccount(newUser);
     ctx.status(201);
   };
@@ -54,7 +53,7 @@ public class UserController {
 
   private Handler login = ctx -> {
     UserDTO userDTO = ctx.bodyAsClass(UserDTO.class);
-    User user = userSystem.login(userDTO.getUserMail(), userDTO.getPassword());
+    User user = userService.login(userDTO.getUserMail(), userDTO.getPassword());
     final String token = tokenizer
         .generate(user.getId().toString(), user.getUserRole().toString());
     ctx.header("token", token);
@@ -70,7 +69,7 @@ public class UserController {
     final UUID userId = UUID
         .fromString(tokenizer.parser(ctx.header("token")).getBody().getSubject());
     final ChangePasswordRequest request = ctx.bodyAsClass(ChangePasswordRequest.class);
-    userSystem.changePassword(userId, request.getOldPassword(), request.getNewPassword());
+    userService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
     ctx.status(201);
   };
 

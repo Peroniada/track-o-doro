@@ -9,22 +9,22 @@ public class UserGoals {
   private DailyGoal dailyGoal;
   private WeeklyGoal weeklyGoal;
 
-  public UserGoals(DailyGoal dailyGoal, WeeklyGoal weeklyGoal, UUID userGoalsId) {
+  public UserGoals(UUID userGoalsId, DailyGoal dailyGoal, WeeklyGoal weeklyGoal) {
     this.dailyGoal = dailyGoal;
     this.weeklyGoal = weeklyGoal;
     this.userGoalsId = userGoalsId;
   }
 
-  public DailyGoal getDailyGoal() {
-    return dailyGoal;
+  public Integer getDailyGoal() {
+    return dailyGoal.getNumberOfSessionsToFulfill();
   }
 
   public void setDailyGoal(DailyGoal dailyGoal) {
     this.dailyGoal = dailyGoal;
   }
 
-  public WeeklyGoal getWeeklyGoal() {
-    return weeklyGoal;
+  public Integer getWeeklyGoal() {
+    return weeklyGoal.getNumberOfSessionsToFulfill();
   }
 
   public void setWeeklyGoal(WeeklyGoal weeklyGoal) {

@@ -8,6 +8,14 @@ public class AppConfiguration {
     public JooqConfig getJooqConfig() {
         return database;
     }
+
+    public JooqConfig getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(JooqConfig database) {
+        this.database = database;
+    }
 }
 
 

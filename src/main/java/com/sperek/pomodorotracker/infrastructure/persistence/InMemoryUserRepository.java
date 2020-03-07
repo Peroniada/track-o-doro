@@ -2,10 +2,10 @@ package com.sperek.pomodorotracker.infrastructure.persistence;
 
 import com.sperek.pomodorotracker.application.ports.secondary.UserRepository;
 import com.sperek.pomodorotracker.domain.user.User;
-import com.sperek.pomodorotracker.domain.user.exceptions.LoginException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class InMemoryUserRepository implements UserRepository {
@@ -27,14 +27,12 @@ public class InMemoryUserRepository implements UserRepository {
   }
 
   @Override
-  public User getOne(UUID userId) {
-    return this.users.get(userId);
+  public Optional<User> getOne(UUID userId) {
+    return Optional.ofNullable(this.users.get(userId));
   }
 
   @Override
-  public User findByMail(String userMail) {
-    return users.values().stream().filter(user -> user.getEmail().equals(userMail)).findFirst()
-        .orElseThrow(
-            LoginException::new);
+  public Optional<User> findByMail(String userMail) {
+    return users.values().stream().filter(user -> user.getEmail().equals(userMail)).findFirst();
   }
 }

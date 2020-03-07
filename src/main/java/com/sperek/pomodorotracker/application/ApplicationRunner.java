@@ -17,7 +17,8 @@ import com.sperek.pomodorotracker.domain.tracker.category.PomodoroCategoryEngine
 import com.sperek.pomodorotracker.domain.tracker.session.InMemoryPomodoroSessionRepository;
 import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSessionEngineImpl;
 import com.sperek.pomodorotracker.domain.user.PBKDF2PasswordEncryptor;
-import com.sperek.pomodorotracker.domain.user.UserSystem;
+import com.sperek.pomodorotracker.domain.user.UserService;
+import com.sperek.pomodorotracker.infrastructure.configuration.AppConfiguration;
 import com.sperek.pomodorotracker.infrastructure.configuration.ConfigurationLoader;
 import com.sperek.pomodorotracker.infrastructure.persistence.JooqUserRepository;
 
@@ -34,7 +35,9 @@ public class ApplicationRunner implements Runnable {
     final ConfigurationLoader configurationLoader = new ConfigurationLoader();
 
     ClassLoader classLoader = getClass().getClassLoader();
-    final JooqConfig jooqConfig = configurationLoader.loadConfiguration(new File(classLoader.getResource("db-config.yml").getFile()), JooqConfig.class);
+    final File config = new File(classLoader.getResource("db-config.yml").getFile());
+    final AppConfiguration appConfiguration = configurationLoader.loadConfiguration(
+        config, AppConfiguration.class);
 
     final PomodoroCategoryRepository categoryRepository = new InMemoryPomodoroCategoryRepository();
     final PomodoroCategoryEngine categoryEngine = new PomodoroCategoryEngineImpl(categoryRepository);
@@ -45,11 +48,11 @@ public class ApplicationRunner implements Runnable {
     final CategoryController categoryController = new CategoryController(tracker, tokenizer);
     final GoalController goalController = new GoalController(tracker);
 
-    final UserRepository userRepository = new JooqUserRepository(jooqConfig);
+    final UserRepository userRepository = new JooqUserRepository(appConfiguration.getJooqConfig());
     final PBKDF2PasswordEncryptor passwordEncryptor = new PBKDF2PasswordEncryptor();
-    final UserSystem userSystem = new UserSystem(userRepository, passwordEncryptor);
+    final UserService userService = new UserService(userRepository, passwordEncryptor);
 
-    final UserController userController = new UserController(userSystem, tokenizer);
+    final UserController userController = new UserController(userService, tokenizer);
 
     final JavalinConfig javalinConfig = new JavalinConfig(sessionController, categoryController, goalController, userController, tokenizer);
     final JsonMapperConfig jsonMapperConfig = new JsonMapperConfig();
