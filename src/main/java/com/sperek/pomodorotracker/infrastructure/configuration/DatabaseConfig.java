@@ -1,4 +1,4 @@
-package com.sperek.pomodorotracker.application;
+package com.sperek.pomodorotracker.infrastructure.configuration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,7 +7,7 @@ import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
-public class JooqConfig {
+public class DatabaseConfig {
 
   private String userName;
   private String password;

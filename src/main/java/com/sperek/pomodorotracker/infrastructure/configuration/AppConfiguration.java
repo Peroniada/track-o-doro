@@ -1,20 +1,28 @@
 package com.sperek.pomodorotracker.infrastructure.configuration;
 
-import com.sperek.pomodorotracker.application.JooqConfig;
-
 public class AppConfiguration {
-    private JooqConfig database;
+    private DatabaseConfig databaseConfig;
 
-    public JooqConfig getJooqConfig() {
-        return database;
+    private HttpConfig httpConfig;
+
+    public DatabaseConfig getJooqConfig() {
+        return databaseConfig;
     }
 
-    public JooqConfig getDatabase() {
-        return database;
+    public DatabaseConfig getDatabaseConfig() {
+        return databaseConfig;
     }
 
-    public void setDatabase(JooqConfig database) {
-        this.database = database;
+    public void setDatabaseConfig(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
+    }
+
+    public HttpConfig getHttpConfig() {
+        return httpConfig;
+    }
+
+    public void setHttpConfig(HttpConfig httpConfig) {
+        this.httpConfig = httpConfig;
     }
 }
 

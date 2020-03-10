@@ -27,16 +27,16 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SessionController {
+public class PomodoroController {
 
   private final String CURRENT_USER_ID_HEADER_NAME = "Token";
 
   private PomodoroTracker tracker;
   private QueryResolver queryResolver;
   private JWTTokenizer tokenizer;
-  private Logger log = LoggerFactory.getLogger(SessionController.class);
+  private Logger log = LoggerFactory.getLogger(PomodoroController.class);
 
-  public SessionController(PomodoroTracker tracker, JWTTokenizer tokenizer) {
+  public PomodoroController(PomodoroTracker tracker, JWTTokenizer tokenizer) {
     this.tracker = tracker;
     this.tokenizer = tokenizer;
     this.queryResolver = new QueryResolver();

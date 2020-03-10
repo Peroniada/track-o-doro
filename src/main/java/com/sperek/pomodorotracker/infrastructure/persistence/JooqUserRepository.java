@@ -1,37 +1,38 @@
 package com.sperek.pomodorotracker.infrastructure.persistence;
 
-import static com.sperek.infrastructure.Tables.USER_ACCOUNT;
-import static com.sperek.infrastructure.Tables.USER_GOALS;
-
 import com.sperek.infrastructure.enums.Role;
 import com.sperek.infrastructure.tables.records.UserAccountRecord;
-import com.sperek.pomodorotracker.application.JooqConfig;
 import com.sperek.pomodorotracker.application.ports.secondary.UserRepository;
 import com.sperek.pomodorotracker.domain.user.User;
 import com.sperek.pomodorotracker.domain.user.UserRole;
+import com.sperek.pomodorotracker.infrastructure.configuration.DatabaseConfig;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectWhereStep;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectWhereStep;
+
+import static com.sperek.infrastructure.Tables.USER_ACCOUNT;
+import static com.sperek.infrastructure.Tables.USER_GOALS;
 
 public class JooqUserRepository implements UserRepository {
 
-  private JooqConfig jooqConfig;
+  private DatabaseConfig databaseConfig;
 
-  public JooqUserRepository(JooqConfig jooqConfig) {
-    this.jooqConfig = jooqConfig;
+  public JooqUserRepository(DatabaseConfig databaseConfig) {
+    this.databaseConfig = databaseConfig;
   }
 
   @Override
   public void save(User newUser) {
     final UserRole userRole = newUser.getUserRole();
     Role role = Role.valueOf(userRole.name());
-    try (Connection conn = jooqConfig.connection()) {
-      DSLContext dsl = jooqConfig.dsl(conn);
+    try (Connection conn = databaseConfig.connection()) {
+      DSLContext dsl = databaseConfig.dsl(conn);
       dsl.insertInto(USER_GOALS)
           .columns(USER_GOALS.PK_USER_GOALS_ID, USER_GOALS.DAILY_GOAL, USER_GOALS.WEEKLY_GOAL)
           .values(newUser.getUserGoals(), 1, 1)
@@ -49,7 +50,7 @@ public class JooqUserRepository implements UserRepository {
 
   @Override
   public Collection<User> findAll() {
-    try (Connection conn = jooqConfig.connection()) {
+    try (Connection conn = databaseConfig.connection()) {
       return selectFromUserAccount(conn).fetchInto(User.class);
     } catch (SQLException e) {
       throw new DBConnectionException(e.getMessage());
@@ -57,12 +58,12 @@ public class JooqUserRepository implements UserRepository {
   }
 
   private SelectWhereStep<UserAccountRecord> selectFromUserAccount(Connection connection) {
-    return jooqConfig.dsl(connection).selectFrom(USER_ACCOUNT);
+    return databaseConfig.dsl(connection).selectFrom(USER_ACCOUNT);
   }
 
   @Override
   public Optional<User> getOne(UUID userId) {
-    try (Connection connection = jooqConfig.connection()) {
+    try (Connection connection = databaseConfig.connection()) {
       return Optional.ofNullable(selectFromUserAccount(connection)
           .where(USER_ACCOUNT.PK_USER_ID.eq(userId)).fetchOne().into(User.class));
 
@@ -73,7 +74,7 @@ public class JooqUserRepository implements UserRepository {
 
   @Override
   public Optional<User> findByMail(String userMail) {
-    try (Connection connection = jooqConfig.connection()) {
+    try (Connection connection = databaseConfig.connection()) {
       final Record user = selectFromUserAccount(connection)
           .where(USER_ACCOUNT.EMAIL.eq(userMail))
           .fetchOne();

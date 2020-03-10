@@ -2,3 +2,5 @@ database:
   userName: ${DB_USER:-postgres}
   password: ${POSTGRES_PASSWORD:-root}
   host: ${DB_URL:-localhost:5432/pomodoro-tracker}
+http:
+  port: ${POMODORO_PORT:-8080}

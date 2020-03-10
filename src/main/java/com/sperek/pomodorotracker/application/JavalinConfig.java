@@ -1,10 +1,7 @@
 package com.sperek.pomodorotracker.application;
 
+import com.sperek.pomodorotracker.application.api.*;
 import com.sperek.pomodorotracker.application.api.ApiRole;
-import com.sperek.pomodorotracker.application.api.GoalController;
-import com.sperek.pomodorotracker.application.api.CategoryController;
-import com.sperek.pomodorotracker.application.api.SessionController;
-import com.sperek.pomodorotracker.application.api.UserController;
 import com.sperek.pomodorotracker.application.security.JWTTokenizer;
 import io.javalin.Javalin;
 import io.javalin.core.security.AccessManager;
@@ -19,20 +16,12 @@ import java.util.Optional;
 
 public class JavalinConfig implements Runnable {
 
-  private SessionController sessionController;
-  private CategoryController categoryController;
-  private GoalController goalController;
-  private UserController userController;
+  private PomodoroApi api;
   private JWTTokenizer tokenizer;
 
-  public JavalinConfig(SessionController sessionController,
-      CategoryController categoryController,
-      GoalController goalController,
-      UserController userController, JWTTokenizer tokenizer) {
-    this.sessionController = sessionController;
-    this.categoryController = categoryController;
-    this.goalController = goalController;
-    this.userController = userController;
+
+  public JavalinConfig(PomodoroApi pomodoroApi, JWTTokenizer tokenizer) {
+    this.api = pomodoroApi;
     this.tokenizer = tokenizer;
   }
 
@@ -63,11 +52,11 @@ public class JavalinConfig implements Runnable {
           config.accessManager(accessManager);
         }).start(8891);
 
-    app.routes(sessionController.apiRoutes());
-    app.routes(categoryController.apiRoutes());
-    app.routes(userController.apiRoutes());
+    app.routes(api.getPomodoroController().apiRoutes());
+    app.routes(api.getCategoryController().apiRoutes());
+    app.routes(api.getUserController().apiRoutes());
 
-    app.get("/dailyGoalFinished", goalController.dailyPomodoroGoalFinished);
+    app.get("/dailyGoalFinished", api.getGoalController().dailyPomodoroGoalFinished);
 
   }
 

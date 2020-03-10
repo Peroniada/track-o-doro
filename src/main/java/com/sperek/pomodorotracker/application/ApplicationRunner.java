@@ -1,9 +1,6 @@
 package com.sperek.pomodorotracker.application;
 
-import com.sperek.pomodorotracker.application.api.CategoryController;
-import com.sperek.pomodorotracker.application.api.GoalController;
-import com.sperek.pomodorotracker.application.api.SessionController;
-import com.sperek.pomodorotracker.application.api.UserController;
+import com.sperek.pomodorotracker.application.api.*;
 import com.sperek.pomodorotracker.application.ports.PomodoroCategoryEngine;
 import com.sperek.pomodorotracker.application.ports.PomodoroSessionEngine;
 import com.sperek.pomodorotracker.application.ports.secondary.PomodoroCategoryRepository;
@@ -19,10 +16,10 @@ import com.sperek.pomodorotracker.domain.tracker.session.PomodoroSessionEngineIm
 import com.sperek.pomodorotracker.domain.user.PBKDF2PasswordEncryptor;
 import com.sperek.pomodorotracker.domain.user.UserService;
 import com.sperek.pomodorotracker.infrastructure.configuration.AppConfiguration;
+import com.sperek.pomodorotracker.infrastructure.configuration.ConfigFileLoader;
 import com.sperek.pomodorotracker.infrastructure.configuration.ConfigurationLoader;
 import com.sperek.pomodorotracker.infrastructure.persistence.JooqUserRepository;
 
-import java.io.File;
 import java.util.UUID;
 
 public class ApplicationRunner implements Runnable {
@@ -34,27 +31,27 @@ public class ApplicationRunner implements Runnable {
 
     final ConfigurationLoader configurationLoader = new ConfigurationLoader();
 
-    ClassLoader classLoader = getClass().getClassLoader();
-    final File config = new File(classLoader.getResource("db-config.yml").getFile());
+    ConfigFileLoader configFileLoader = new ConfigFileLoader();
     final AppConfiguration appConfiguration = configurationLoader.loadConfiguration(
-        config, AppConfiguration.class);
+        configFileLoader.load(), AppConfiguration.class);
 
     final PomodoroCategoryRepository categoryRepository = new InMemoryPomodoroCategoryRepository();
     final PomodoroCategoryEngine categoryEngine = new PomodoroCategoryEngineImpl(categoryRepository);
 
     final PomodoroTracker tracker = new PomodoroTracker(sessionEngine, categoryEngine);
     final JWTTokenizer tokenizer = new JWTTokenizer();
-    final SessionController sessionController = new SessionController(tracker, tokenizer);
+    final PomodoroController pomodoroController = new PomodoroController(tracker, tokenizer);
     final CategoryController categoryController = new CategoryController(tracker, tokenizer);
     final GoalController goalController = new GoalController(tracker);
 
-    final UserRepository userRepository = new JooqUserRepository(appConfiguration.getJooqConfig());
+    final UserRepository userRepository = new JooqUserRepository(appConfiguration.getDatabaseConfig());
     final PBKDF2PasswordEncryptor passwordEncryptor = new PBKDF2PasswordEncryptor();
     final UserService userService = new UserService(userRepository, passwordEncryptor);
 
     final UserController userController = new UserController(userService, tokenizer);
 
-    final JavalinConfig javalinConfig = new JavalinConfig(sessionController, categoryController, goalController, userController, tokenizer);
+    PomodoroApi pomodoroApi = new PomodoroApi(userController, categoryController, goalController, pomodoroController);
+    final JavalinConfig javalinConfig = new JavalinConfig(pomodoroApi, tokenizer);
     final JsonMapperConfig jsonMapperConfig = new JsonMapperConfig();
 
     javalinConfig.run();
