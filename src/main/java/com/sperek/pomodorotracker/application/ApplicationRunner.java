@@ -44,14 +44,14 @@ public class ApplicationRunner implements Runnable {
     final CategoryController categoryController = new CategoryController(tracker, tokenizer);
     final GoalController goalController = new GoalController(tracker);
 
-    final UserRepository userRepository = new JooqUserRepository(appConfiguration.getDatabaseConfig());
+    final UserRepository userRepository = new JooqUserRepository(appConfiguration.getDatabase());
     final PBKDF2PasswordEncryptor passwordEncryptor = new PBKDF2PasswordEncryptor();
     final UserService userService = new UserService(userRepository, passwordEncryptor);
 
     final UserController userController = new UserController(userService, tokenizer);
 
     PomodoroApi pomodoroApi = new PomodoroApi(userController, categoryController, goalController, pomodoroController);
-    final JavalinConfig javalinConfig = new JavalinConfig(pomodoroApi, tokenizer);
+    final JavalinConfig javalinConfig = new JavalinConfig(pomodoroApi, tokenizer, appConfiguration.getHttp());
     final JsonMapperConfig jsonMapperConfig = new JsonMapperConfig();
 
     javalinConfig.run();

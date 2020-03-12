@@ -1,8 +1,9 @@
 package com.sperek.pomodorotracker.application;
 
-import com.sperek.pomodorotracker.application.api.*;
 import com.sperek.pomodorotracker.application.api.ApiRole;
+import com.sperek.pomodorotracker.application.api.PomodoroApi;
 import com.sperek.pomodorotracker.application.security.JWTTokenizer;
+import com.sperek.pomodorotracker.infrastructure.configuration.HttpConfig;
 import io.javalin.Javalin;
 import io.javalin.core.security.AccessManager;
 import io.javalin.core.security.Role;
@@ -18,26 +19,29 @@ public class JavalinConfig implements Runnable {
 
   private PomodoroApi api;
   private JWTTokenizer tokenizer;
+  private HttpConfig httpConfig;
 
 
-  public JavalinConfig(PomodoroApi pomodoroApi, JWTTokenizer tokenizer) {
+  public JavalinConfig(PomodoroApi pomodoroApi, JWTTokenizer tokenizer,
+      HttpConfig httpConfig) {
     this.api = pomodoroApi;
     this.tokenizer = tokenizer;
+    this.httpConfig = httpConfig;
   }
 
-  private AccessManager accessManager = (handler, ctx, permittedRoles) ->  {
-      Role userRole = determineUserRole(ctx);
-      if (permittedRoles.contains(userRole) || permittedRoles.isEmpty()) {
-        handler.handle(ctx);
-      } else {
-        ctx.status(401).result("Unauthorized");
-      }
+  private AccessManager accessManager = (handler, ctx, permittedRoles) -> {
+    Role userRole = determineUserRole(ctx);
+    if (permittedRoles.contains(userRole) || permittedRoles.isEmpty()) {
+      handler.handle(ctx);
+    } else {
+      ctx.status(401).result("Unauthorized");
+    }
   };
 
   private Role determineUserRole(Context ctx) {
     String role = "ANYONE";
     String token = Optional.ofNullable(ctx.header("Token")).orElse("");
-    if(!token.isEmpty()) {
+    if (!token.isEmpty()) {
       role = tokenizer.parser(token).getBody().get("role").toString();
     }
     return ApiRole.valueOf(role.toUpperCase());
@@ -50,7 +54,7 @@ public class JavalinConfig implements Runnable {
           config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
           config.registerPlugin(new RouteOverviewPlugin("routes"));
           config.accessManager(accessManager);
-        }).start(8891);
+        }).start(httpConfig.getPortNumber());
 
     app.routes(api.getPomodoroController().apiRoutes());
     app.routes(api.getCategoryController().apiRoutes());
